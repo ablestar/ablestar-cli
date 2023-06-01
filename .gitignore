@@ -1,0 +1,30 @@
+# NPM #
+node_modules/
+/node_modules/
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.env
+
+# config file.
+######################
+config.ini
+cli.ini
+
+#####################
+*.csv
+*.xlsx
+
+#####################
+*.tgz
+
+
+# Docs
+docs/build
+.DS_Store
+
+# Ignore test-related files
+/coverage.data
+/coverage/
