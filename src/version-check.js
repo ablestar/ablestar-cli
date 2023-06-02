@@ -54,8 +54,7 @@ const getCurrentVersion = () => thisPackage.version;
 
 const getLatestVersion = async () => {
 	try {
-		// const name = thisPackage.name;
-		const name = 'ablestar-components';
+		const name = thisPackage.name;
 		const publishedPackage = await packageJson(name, {
 			allVersions: true,
 			registryUrl: `https://npmjs-proxy.ablestar.workers.dev`,
