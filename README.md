@@ -1,4 +1,4 @@
-<img src="https://github.com/ablestar/ablestar-cli/blob/main/assets/cli_logo.png?raw=true" width="150"/>
+<img src="https://static.ablestar.app/ablestar-cli/logo.png" width="150"/>
 
 # ablestar-cli
 <img src="https://img.shields.io/badge/License-AGPL-green.svg" />
