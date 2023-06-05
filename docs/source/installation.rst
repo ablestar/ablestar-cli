@@ -1,7 +1,17 @@
 Installation
 ============
 
-You can install ``ablestar-cli`` by doing the following: 
+From  npm
+---------
+
+You can install ``ablestar-cli`` on your local system by running: ::
+
+    npm i -g @ablestar/ablestar-cli
+
+From Source
+-----------
+
+If you want to install the source code from source you can download the code from Github and install it that way. The steps are: 
 
 - Clone the project to a local folder
 - Enter the folder and run ``npm install``

@@ -33,7 +33,7 @@ This short recording shows how to configure `ablestar-cli` and export Shopify or
 
 The output file will look like this:
 
-<img src="https://static.ablestar.app/ablestar-cli/Shopify Order Export.png" width="629"/>
+<img src="https://static.ablestar.app/ablestar-cli/Shopify Order Export.png" width="1258"/>
 
 
 ## Contributing
