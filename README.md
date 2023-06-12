@@ -43,3 +43,8 @@ All contributions are welcome, when opening a PR please follow our [contribution
 ## About Ablestar
 
 Ablestar is a trusted Shopify app developer, specializing in creating highly-rated apps since 2016. With tens of thousands of stores using their apps, Ablestar is known for their top-ranked [Bulk Product Editor](https://apps.shopify.com/bulk-product-editor?utm_source=ablestar-cli&utm_medium=readme&utm_campaign=ablestar-cli) app and their commitment to helping businesses save time, streamline operations, and increase sales.
+
+Other Ablestar projects include:
+
+- [AppNavigator](https://appnavigator.io/) - Historical data and review analysis for the Shopify App store
+- [Spreadsheet Toolkit](https://spreadsheettoolkit.com) - Free tool for performing common tasks on spreadsheets
