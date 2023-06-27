@@ -12,6 +12,7 @@ import {
 	customCollectionFields,
 	customerFields,
 	getGroup,
+	metaobjectEntriesFields,
 	orderFields,
 	productFields,
 } from '../utils/fields.js';
@@ -201,9 +202,11 @@ export async function promptForMissingOptions(options) {
 					return customCollectionFields;
 				if (answers.type === 'smart_collections' || options.type === 'smart_collections')
 					return automatedCollectionFields;
+				if (answers.type === 'metaobject_entries' || options.type === 'metaobject_entries')
+					return metaobjectEntriesFields;
 			},
 			multiple: true,
-			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject') && !options.type?.includes('metaobject')),
+			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject_definitions') && !options.type?.includes('metaobject_definitions')),
 		},
 	];
 
