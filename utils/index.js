@@ -124,7 +124,7 @@ export function getHeader(json, type, fields) {
 	let keys = [],
 		header = [];
 
-	if (type.includes('metaobject')) {
+	if (type.includes('metaobject_definitions')) {
 		return {keys: Object.keys(json[0]), header: Object.keys(json[0])}
 	}
 	
@@ -363,4 +363,9 @@ export function generateFileName(type) {
 
 export function minTwoDigits(n) {
 	return (n < 10 ? '0' : '') + n;
+}
+
+export function numFromID (str) {
+	const match = str.match(/\d+$/);
+	return match ? match[0] : null;
 }

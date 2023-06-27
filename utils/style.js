@@ -1345,6 +1345,56 @@ export const matrixifyStyles = {
 			fill: 'e7e6e6',
 		},
 	},
+	'Metaobject Entries': {
+		"ID": {
+			width: 24,
+			fill: '9fffff',
+		},
+		"Handle": {
+			width: 24,
+			fill: '9fffff',
+		},
+		"Command": {
+			width: 12,
+			fill: 'cbcbcb',
+		},
+		"Display Name": {
+			width: 18,
+			fill: '9fffff',
+		},
+		"Status": {
+			width: 10,
+			fill: '9fffff',
+		},
+		"Updated At": {
+			width: 22,
+			fill: '9fffff',
+		},
+		"Definition: Handle": {
+			width: 22,
+			fill: '9fff9f',
+		},
+		"Definition: Name": {
+			width: 22,
+			fill: '9fff9f',
+		},
+		"Top Row": {
+			width: 14,
+			fill: 'cbcbcb',
+		},
+		"Row #": {
+			width: 12,
+			fill: 'cbcbcb',
+		},
+		"Field": {
+			width: 22,
+			fill: 'e3ffff',
+		},
+		"Value": {
+			width: 22,
+			fill: 'e3ffff',
+		},
+	},
 };
 
 export const summaryHeader = [

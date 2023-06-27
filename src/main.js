@@ -12,6 +12,7 @@ import {
 import {
 	getHeader,
 	jsonToSheet,
+	numFromID,
 	orderMultiFields,
 	sheetToCsv,
 	writeExcel,
@@ -91,14 +92,37 @@ export async function run(options) {
 							let entryEndCursor = '';
 							const entries = await shopifyGraphMetaobjectEntries({ store: options.url, type: definition.type, entryEndCursor});
 							bar1.increment(1);
-							result = [...result, ...entries ? entries.nodes.map(item => (item.fields.map(itemField => ({
-								id: item.id,
-								displayName: item.displayName,
-								handle: item.handle,
-								type: item.type,
-								fieldKey: itemField.key,
-								fieldValue: itemField.value,
-							})))).flat() : [] ];
+							if (options.fields.includes('fieldValue-field') || options.fields.includes('fieldKey-field'))
+								result = [...result, ...entries ? entries.nodes.map(item => (item.fields.map((itemField, index) => ({
+									id: numFromID(item.id),
+
+									top_row_command : index === 0 ? 'TRUE' : null,
+									definitionHandle: definition.type,
+									definitionName: definition.name,
+									status: 'Active',
+
+									displayName: item.displayName,
+									handle: item.handle,
+									type: item.type,
+									updatedAt: item.updatedAt,
+
+									field__fieldKey: itemField.key,
+									field__fieldValue: itemField.value,
+								})))).flat() : [] ];
+							else
+								result = [...result, ...entries ? entries.nodes.map(item =>  ({
+									id: numFromID(item.id),
+
+									top_row_command : 'TRUE',
+									definitionHandle: definition.type,
+									definitionName: definition.name,
+									status: 'Active',
+
+									displayName: item.displayName,
+									handle: item.handle,
+									type: item.type,
+									updatedAt: item.updatedAt,
+								})).flat() : [] ];
 						})
 					)
 				}

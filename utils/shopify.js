@@ -219,6 +219,7 @@ const ENTRY_QUERY = (cursor, type) => `{
 			displayName
 			handle
 			type
+			updatedAt
 			fields {
 				key
 				value

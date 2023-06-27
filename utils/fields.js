@@ -394,6 +394,25 @@ export const fieldNames = {
 			condition: 'Rule: Condition',
 		},
 	},
+	metaobject_entries: {
+		basic: {
+			id: 'ID',
+			handle: 'Handle',
+			command: 'Command',
+
+			displayName:"Display Name",
+			status:"Status",
+			updatedAt:"Updated At",
+			definitionHandle:"Definition: Handle",
+			definitionName:"Definition: Name",
+			top_row_command:"Top Row",
+			row_number_command:"Row #",
+		},
+		field: {
+			fieldKey:"Field",
+			fieldValue:"Value",
+		}
+	}
 };
 
 // Functions for all expor type.
@@ -781,6 +800,21 @@ export const automatedCollectionFields = [
 	},
 ];
 
+export const metaobjectEntriesFields = [
+	{
+		value: 'basic',
+		name: 'Basic Columns',
+		open: true,
+		children: makeOptions(fieldNames.metaobject_entries.basic),
+	},
+	{
+		value: 'field',
+		name: 'Field Values',
+		open: false,
+		children: makeOptions(fieldNames.metaobject_entries.field),
+	},
+];
+
 export function defaultFields(type) {
 	switch (type) {
 		case 'products':
@@ -869,6 +903,15 @@ export function addFields(format, type, fields) {
 					: []),
 			];
 
+		case 'metaobject_entries':
+			return [
+				'command-basic',
+				'row_number_command-basic',
+				'top_row_command-basic',
+				...(!fields.includes('id-basic') ? ['id-basic'] : []),
+				...(!fields.includes('handle-basic') ? ['handle-basic'] : []),
+			]
+
 		default:
 			return [];
 	}
@@ -897,6 +940,7 @@ export function addValues(format, type, item, index) {
 
 		case 'smart_collections':
 		case 'custom_collections':
+		case 'metaobject_entries':
 			return {
 				command: 'MERGE',
 				row_number_command: index + 1,
