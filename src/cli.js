@@ -25,7 +25,7 @@ import { actionTree } from '../utils/actions.js';
 
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import fuzzyPath from 'inquirer-fuzzy-path';
-import { runImport, runImportCustomCollection } from './import.js';
+import { runImport, runImportCustomCollection, runImportSmartCollection } from './import.js';
 import os from 'os';
 
 const appRootPath = { path: os.homedir() };
@@ -449,6 +449,7 @@ async function cli(args) {
 
 			if (options.format === 'Matrixify') {
 				if (options.type === 'custom_collections') await runImportCustomCollection(options, fileData);
+				if (options.type === 'smart_collections') await runImportSmartCollection(options, fileData);
 			}
 
 			else await runImport(options, fileData);

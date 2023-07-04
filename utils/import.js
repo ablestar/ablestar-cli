@@ -51,3 +51,59 @@ export const customCollectionQuery = (item, result, showId = false) => {
 		},
 	};
 };
+
+export const groupSmartCollection = inputJson => {
+	if (!inputJson || !inputJson.length) return [];
+
+	const firstKey = Object.keys(inputJson[0])[0];
+
+	const output = [];
+	const items = {};
+
+	for (const row of inputJson) {
+		const itemObj = items[row[firstKey]] || {
+			ID: row['ID'],
+			Handle: row['Handle'],
+			Command: row.Command,
+			title: row['Title'],
+			body_html: row['Body HTML'],
+			sort_order: row['Sort Order']?.toLowerCase()?.replace(' ', '-'),
+			template_suffix: row['Template Suffix'],
+			disjunctive: row['Must Match'] === 'any condition',
+			published: row['Published'],
+			published_scope: row['Published Scope'],
+			image: {
+				alt: row['Image Alt Text'],
+				src: row['Image Src'],
+			},
+			rules: [],
+		};
+		itemObj.rules.push({
+			column: row['Rule: Product Column']?.toLowerCase()?.replace(' ', '_'),
+			relation: row['Rule: Relation']?.toLowerCase()?.replace(' ', '_'),
+			condition: row['Rule: Condition'],
+		});
+		if (!items[row[firstKey]]) {
+			items[row[firstKey]] = itemObj;
+			output.push(itemObj);
+		}
+	}
+
+	return output;
+};
+
+export const smartCollectionQuery = (item, result, showId = false) => {
+	const { ID, Handle, Command, ...newItem } = item;
+	return {
+		smart_collection: showId
+			? {
+					...newItem,
+					id: itemIDForMatrixify(item, result),
+					handle: Handle,
+			  }
+			: {
+					...newItem,
+					handle: Handle,
+			  },
+	};
+};
