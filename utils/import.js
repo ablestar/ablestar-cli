@@ -1,5 +1,7 @@
 import fs from 'fs';
 import XLSX from 'xlsx';
+import cliProgress from 'cli-progress';
+import { shopifyItemRESTApi, shopifyRESTApi } from './shopify.js';
 
 export async function analyzeFile(fileName) {
 	let fileContent;
@@ -107,3 +109,192 @@ export const smartCollectionQuery = (item, result, showId = false) => {
 			  },
 	};
 };
+
+export const runMatrixify = async (options, fileData, queryBuilder = customCollectionQuery) => {
+	const bar1 = new cliProgress.SingleBar(
+		{
+			format: `[{bar}] {percentage}% | DUR: {duration}s | ETA: {eta}s | {value}/{total}`,
+		},
+		cliProgress.Presets.shades_classic,
+	);
+	try {
+		console.log();
+		bar1.start(fileData.length, 0);
+
+		let since_id = 0;
+		const limit = 250;
+		let result = [];
+
+		let failed = 0,
+			skip = 0,
+			success = 0;
+
+		while (true) {
+			const query = {
+				params: {
+					fields: ['id', 'handle'],
+					since_id,
+					limit,
+				},
+			};
+
+			const data = await shopifyRESTApi(options.url, options.type, 'get', query);
+
+			if (data[options.type].length === 0) break;
+
+			result = [...result, ...data[options.type]];
+
+			if (data[options.type].length !== limit) break;
+			since_id = data[options.type][data[options.type].length - 1].id;
+		}
+
+		for (const item of fileData) {
+			switch (item.Command) {
+				case 'NEW':
+					if (handleOrIDCheck(item, result)) {
+						failed += 1;
+						break;
+					}
+
+					const query = queryBuilder(item, result);
+
+					try {
+						await shopifyRESTApi(options.url, options.type, 'post', query);
+						success += 1;
+					} catch (error) {
+						failed += 1;
+					}
+
+					break;
+
+				case 'MERGE':
+					if (handleOrIDCheck(item, result)) {
+						if (!item.ID && !item.Handle) {
+							failed += 1;
+							break;
+						}
+						const query1 = queryBuilder(item, result, true);
+						try {
+							await shopifyItemRESTApi(
+								options.url,
+								options.type,
+								itemIDForMatrixify(item, result),
+								'put',
+								query1,
+							);
+							success += 1;
+						} catch (error) {
+							failed += 1;
+						}
+						break;
+					}
+
+					const query1 = queryBuilder(item, result);
+					try {
+						await shopifyRESTApi(options.url, options.type, 'post', query1);
+						success += 1;
+					} catch (error) {
+						failed += 1;
+					}
+
+					break;
+
+				case 'UPDATE':
+					if (handleOrIDCheck(item, result)) {
+						if (!item.ID && !item.Handle) {
+							failed += 1;
+							break;
+						}
+						const query1 = queryBuilder(item, result, true);
+						try {
+							await shopifyItemRESTApi(
+								options.url,
+								options.type,
+								itemIDForMatrixify(item, result),
+								'put',
+								query1,
+							);
+							success += 1;
+						} catch (error) {
+							failed += 1;
+						}
+						break;
+					}
+
+					failed += 1;
+					break;
+
+				case 'REPLACE':
+					if (handleOrIDCheck(item, result)) {
+						if (!item.ID && !item.Handle) {
+							failed += 1;
+							break;
+						}
+						try {
+							await shopifyItemRESTApi(
+								options.url,
+								options.type,
+								itemIDForMatrixify(item, result),
+								'delete',
+							);
+						} catch (error) {
+							failed += 1;
+							break;
+						}
+					}
+
+					const query2 = queryBuilder(item, result);
+					try {
+						await shopifyRESTApi(options.url, options.type, 'post', query2);
+						success += 1;
+					} catch (error) {
+						failed += 1;
+					}
+
+					break;
+
+				case 'DELETE':
+					if (handleOrIDCheck(item, result)) {
+						if (!item.ID && !item.Handle) {
+							failed += 1;
+							break;
+						}
+						try {
+							await shopifyItemRESTApi(
+								options.url,
+								options.type,
+								itemIDForMatrixify(item, result),
+								'delete',
+							);
+							success += 1;
+							break;
+						} catch (error) {
+							failed += 1;
+							break;
+						}
+					}
+
+					failed += 1;
+					break;
+
+				case 'IGNORE':
+					skip += 1;
+					break;
+
+				default:
+					failed += 1;
+					break;
+			}
+			bar1.increment(1);
+		}
+
+		bar1.stop();
+		console.log();
+		console.log(`${success} items success, ${skip} items skip, and ${failed} items failed`);
+		console.log();
+		console.log();
+	} catch (error) {
+		bar1.stop();
+		throw error;
+	}
+}
