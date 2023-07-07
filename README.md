@@ -48,3 +48,5 @@ Other Ablestar projects include:
 
 - [AppNavigator](https://appnavigator.io/) - Historical data and review analysis for the Shopify App store
 - [Spreadsheet Toolkit](https://spreadsheettoolkit.com) - Free tool for performing common tasks on spreadsheets
+
+You can keep yourself informed on updates to ablestar-cli through our [mailing list](https://confirmsubscription.com/h/y/5C2D5BEBF1A3998F).
