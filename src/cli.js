@@ -25,7 +25,7 @@ import { actionTree } from '../utils/actions.js';
 
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import fuzzyPath from 'inquirer-fuzzy-path';
-import { runImport } from './import.js';
+import { runImport, runImportCustomCollection, runImportSmartCollection } from './import.js';
 import os from 'os';
 
 const appRootPath = { path: os.homedir() };
@@ -353,12 +353,20 @@ async function importOptions(options, fileData) {
 		},
 		{
 			type: 'list',
+			name: 'format',
+			message: `Please choose which format file you will ${options.method}.`,
+			choices: ['CSV', 'Excel', 'Matrixify'],
+			default: 'CSV',
+			when: () => !options.format,
+		},
+		{
+			type: 'list',
 			name: 'idColumn',
 			message: 'Which column do you want to use as Identify column?',
 			choices: () => {
 				return Object.keys(fileData[0]);
 			},
-			when: () => !options.idColumn,
+			when: (answers) => !options.idColumn && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
 		},
 		{
 			type: 'list',
@@ -367,7 +375,7 @@ async function importOptions(options, fileData) {
 			choices: answers => {
 				return actionTree(answers.type || options.type);
 			},
-			when: () => !options.action,
+			when: (answers) => !options.action && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
 		},
 		{
 			type: 'list',
@@ -376,7 +384,7 @@ async function importOptions(options, fileData) {
 			choices: () => {
 				return Object.keys(fileData[0]);
 			},
-			when: () => !options.actionColumn,
+			when: (answers) => !options.actionColumn && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
 		},
 	];
 
@@ -385,6 +393,7 @@ async function importOptions(options, fileData) {
 		...options,
 		type: options.type || answers.type,
 		url: options.url || answers.url,
+		format: options.format || answers.format,
 		idColumn: options.idColumn || answers.idColumn,
 		actionColumn: options.actionColumn || answers.actionColumn,
 		action: options.action || answers.action,
@@ -438,12 +447,17 @@ async function cli(args) {
 			const fileData = await analyzeFile(options.fileName);
 			options = await importOptions(options, fileData);
 
-			await runImport(options, fileData);
+			if (options.format === 'Matrixify') {
+				if (options.type === 'custom_collections') await runImportCustomCollection(options, fileData);
+				if (options.type === 'smart_collections') await runImportSmartCollection(options, fileData);
+			}
+
+			else await runImport(options, fileData);
 
 			console.log(chalk.bgCyan.black(' == Alternative Command == '));
 			console.log(
 				chalk.cyan(
-					`ablestar-cli ${options.method} ${options.type} ${options.url} --fileName=${options.fileName} --idColumn=${options.idColumn} --action=${options.action} --actionColumn=${options.actionColumn}`,
+					`ablestar-cli ${options.method} ${options.type} ${options.url} --fileName=${options.fileName} --format=${options.format} ${options.type === 'customers' ? `--idColumn=${options.idColumn} --action=${options.action} --actionColumn=${options.actionColumn}` : ``}`,
 				),
 			);
 		}

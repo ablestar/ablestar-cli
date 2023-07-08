@@ -8,7 +8,7 @@ axios.interceptors.response.use(
 	response => {
 		return response;
 	},
-	error => {console.log('-------------', error)
+	error => {
 		// send 429 as error so recall the api after sleep.
 		if (error.response?.status === 429) {
 			return Promise.reject(429);
@@ -22,7 +22,7 @@ axios.interceptors.response.use(
 			return Promise.reject(4077);
 		}
 
-		console.log(error)
+		// console.log(error)
 
 		return Promise.reject(error.message);
 	},
@@ -69,6 +69,34 @@ export async function shopifyRESTApi(store, resource, method, query) {
 		query,
 	);
 	return response.data;
+}
+
+export async function shopifyItemRESTApi(store, resource, itemId, method, query) {
+	const { apikey, token } = await getKeyToken(store);
+	try {
+		const response = await axios[method](
+			`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${resource}/${itemId}.json`,
+			query,
+		);
+
+		return response.data;
+	} catch (error) {
+		if (error === 429) {
+			sleep(2000);
+			return await shopifyItemRESTApi(store, resource, itemId, method, query);
+		}
+		if (error === 443) {
+			sleep(5000);
+			return await shopifyItemRESTApi(store, resource, itemId, method, query);
+		}
+		if (error === 4077) {
+			sleep(10000);
+			return await shopifyItemRESTApi(store, resource, itemId, method, query);
+		}
+
+		console.log(error);
+		throw error;
+	}
 }
 
 export async function shopifyRESTApiCount(store, resource, method, query) {
