@@ -8,7 +8,7 @@ axios.interceptors.response.use(
 	response => {
 		return response;
 	},
-	error => {console.log('-------------', error)
+	error => {
 		// send 429 as error so recall the api after sleep.
 		if (error.response?.status === 429) {
 			return Promise.reject(429);
