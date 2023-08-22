@@ -64,29 +64,77 @@ export async function shopifyApi(url, query) {
 
 export async function shopifyRESTApi(store, resource, method, query) {
 	const { apikey, token } = await getKeyToken(store);
-	const response = await axios[method](
-		`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${resource}.json`,
-		query,
-	);
-	return response.data;
+	try {
+		const response = await axios[method](
+			`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${resource}.json`,
+			query,
+		);
+		return response.data;
+	} catch (error) {
+		if (error === 429) {
+			sleep(2000);
+			return await shopifyRESTApi(store, resource, method, query);
+		}
+		if (error === 443) {
+			sleep(5000);
+			return await shopifyRESTApi(store, resource, method, query);
+		}
+		if (error === 4077) {
+			sleep(10000);
+			return await shopifyRESTApi(store, resource, method, query);
+		}
+	}
+	
 }
 
 export async function shopifyRESTApiCount(store, resource, method, query) {
 	const { apikey, token } = await getKeyToken(store);
-	const response = await axios[method](
-		`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${resource}/count.json`,
-		query,
-	);
-	return response.data;
+	try {
+		const response = await axios[method](
+			`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${resource}/count.json`,
+			query,
+		);
+		return response.data;
+	} catch (error) {
+		if (error === 429) {
+			sleep(2000);
+			return await shopifyRESTApiCount(store, resource, method, query);
+		}
+		if (error === 443) {
+			sleep(5000);
+			return await shopifyRESTApiCount(store, resource, method, query);
+		}
+		if (error === 4077) {
+			sleep(10000);
+			return await shopifyRESTApiCount(store, resource, method, query);
+		}
+	}
+	
 }
 
 export async function shopifyRESTApiDomain(store, method, query) {
 	const { apikey, token } = await getKeyToken(store);
-	const response = await axios[method](
-		`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/shop.json`,
-		query,
-	);
-	return response.data;
+	try {
+		const response = await axios[method](
+			`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/shop.json`,
+			query,
+		);
+		return response.data;
+	} catch (error) {
+		if (error === 429) {
+			sleep(2000);
+			return await shopifyRESTApiDomain(store, method, query);
+		}
+		if (error === 443) {
+			sleep(5000);
+			return await shopifyRESTApiDomain(store, method, query);
+		}
+		if (error === 4077) {
+			sleep(10000);
+			return await shopifyRESTApiDomain(store, method, query);
+		}
+	}
+	
 }
 
 export async function shopifyRESTApiCollectionProducts(store, collectionId) {
