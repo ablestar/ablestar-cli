@@ -1,6 +1,6 @@
 {
 	"name": "@ablestar/ablestar-cli",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Ablestar command-line interface for Shopify.",
 	"main": "src/cli.js",
 	"bin": {
