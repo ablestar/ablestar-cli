@@ -7,7 +7,7 @@ copyright = "2023, Ablestar LLC"
 author = "Ablestar LLC"
 
 release = "1.0"
-version = "0.0.3"
+version = "0.0.4"
 
 # -- General configuration
 
