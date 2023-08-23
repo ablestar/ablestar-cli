@@ -74,7 +74,7 @@ const renderUpdateBanner = (current, latest) => {
 	${chalk.hex('#FFA500')('   Update available! ')} ${chalk.yellowBright(
 		current,
 	)}  →  ${chalk.greenBright(latest)}
-	Run ${chalk.cyan('npm install -g ablestar-cli')} to update
+	Run ${chalk.cyan('npm install -g @ablestar/ablestar-cli')} to update
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	`);
 };
