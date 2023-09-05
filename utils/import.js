@@ -6,11 +6,25 @@ import { shopifyItemRESTApi, shopifyRESTApi } from './shopify.js';
 export async function analyzeFile(fileName) {
 	let fileContent;
 	if (await fs.existsSync(fileName)) {
-		var workbook = XLSX.readFile(fileName);
-		var sheet_name_list = workbook.SheetNames;
-		var xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+		const workbook = XLSX.readFile(fileName);
+		const sheet_name_list = workbook.SheetNames;
+		const xlData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
 		return xlData;
+	} else {
+		console.log();
+		console.log('Please correct file path/name');
+		throw 'Error';
+	}
+}
+
+export async function getHeaderColumn(fileName) {
+	if (await fs.existsSync(fileName)) {
+		const workbook = XLSX.readFile(fileName);
+		const sheet_name_list = workbook.SheetNames;
+		const columnsArray = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], { header: 1 })[0];
+
+		return columnsArray;
 	} else {
 		console.log();
 		console.log('Please correct file path/name');
@@ -129,6 +143,9 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 			skip = 0,
 			success = 0;
 
+		// result output array
+		let output = {};
+
 		while (true) {
 			const query = {
 				params: {
@@ -149,9 +166,23 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		}
 
 		for (const item of fileData) {
+			// key for result output
+			const itemKey = item.ID || item.Handle;
+			output[itemKey] = {
+				itemKey,
+				'ID (ref)': itemIDForMatrixify(item, result),
+				'Handle (ref)': item.Handle,
+				'Import Result': 'OK',
+				'Import Comment': ''
+			};
+			
 			switch (item.Command) {
 				case 'NEW':
+					output[itemKey]['Import Comment'] = 'New';
+
 					if (handleOrIDCheck(item, result)) {
+						output[itemKey]['Import Result'] = 'Failed';
+						output[itemKey]['Import Comment'] = 'ID or Handle is already exist.';
 						failed += 1;
 						break;
 					}
@@ -160,8 +191,11 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 
 					try {
 						await shopifyRESTApi(options.url, options.type, 'post', query);
+						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
+						output[itemKey]['Import Result'] = 'Failed';
+						output[itemKey]['Import Comment'] = 'Error when tring to create new item.';
 						failed += 1;
 					}
 
@@ -170,6 +204,8 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 				case 'MERGE':
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
@@ -182,8 +218,11 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 								'put',
 								query1,
 							);
+							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 						} catch (error) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Error when tring to update item.';
 							failed += 1;
 						}
 						break;
@@ -192,8 +231,11 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					const query1 = queryBuilder(item, result);
 					try {
 						await shopifyRESTApi(options.url, options.type, 'post', query1);
+						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
+						output[itemKey]['Import Result'] = 'Failed';
+						output[itemKey]['Import Comment'] = 'Error when tring to create new item.';
 						failed += 1;
 					}
 
@@ -202,6 +244,8 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 				case 'UPDATE':
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
@@ -214,19 +258,25 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 								'put',
 								query1,
 							);
+							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 						} catch (error) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Error when tring to update item.';
 							failed += 1;
 						}
 						break;
 					}
-
+					output[itemKey]['Import Result'] = 'Failed';
+					output[itemKey]['Import Comment'] = 'Cannot find the ID or Handle matched.';
 					failed += 1;
 					break;
 
 				case 'REPLACE':
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
@@ -238,6 +288,8 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 								'delete',
 							);
 						} catch (error) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Error when tring to delete item.';
 							failed += 1;
 							break;
 						}
@@ -246,8 +298,11 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					const query2 = queryBuilder(item, result);
 					try {
 						await shopifyRESTApi(options.url, options.type, 'post', query2);
+						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
+						output[itemKey]['Import Result'] = 'Failed';
+						output[itemKey]['Import Comment'] = 'Error when tring to update item.';
 						failed += 1;
 					}
 
@@ -256,6 +311,8 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 				case 'DELETE':
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
@@ -266,22 +323,30 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 								itemIDForMatrixify(item, result),
 								'delete',
 							);
+							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 							break;
 						} catch (error) {
+							output[itemKey]['Import Result'] = 'Failed';
+							output[itemKey]['Import Comment'] = 'Error when tring to delete item.';
 							failed += 1;
 							break;
 						}
 					}
-
+					output[itemKey]['Import Result'] = 'Failed';
+					output[itemKey]['Import Comment'] = 'Cannot find the ID or Handle matched.';
 					failed += 1;
 					break;
 
 				case 'IGNORE':
 					skip += 1;
+					output[itemKey]['Import Result'] = 'Ignored';
+					output[itemKey]['Import Comment'] = '';
 					break;
 
 				default:
+					output[itemKey]['Import Result'] = 'Failed';
+					output[itemKey]['Import Comment'] = 'No matched commands find.';
 					failed += 1;
 					break;
 			}
@@ -293,6 +358,7 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		console.log(`${success} items success, ${skip} items skip, and ${failed} items failed`);
 		console.log();
 		console.log();
+		return output;
 	} catch (error) {
 		bar1.stop();
 		throw error;
