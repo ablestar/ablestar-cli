@@ -451,8 +451,8 @@ async function cli(args) {
 				if (options.type === 'custom_collections') outputData = await runImportCustomCollection(options, fileData);
 				if (options.type === 'smart_collections') outputData = await runImportSmartCollection(options, fileData);
 
-				const outputJson = fileData.map(item => {
-					const { itemKey, ...rest } = Object.values(outputData).find(i => i.itemKey === item.ID || i.itemKey === item.Handle);
+				const outputJson = fileData.map((item, itemIndex) => {
+					const { itemKey, ...rest } = Object.values(outputData).find(i => i.itemKey === item.ID || i.itemKey === item.Handle || i.itemKey === itemIndex);
 					
 					return { ...item, ...rest }
 				})

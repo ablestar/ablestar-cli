@@ -35,7 +35,7 @@ export async function getHeaderColumn(fileName) {
 export const itemIDForMatrixify = (item, result) => {
 	return item.ID && result.map(i => i.id).includes(item.ID)
 		? item.ID
-		: result.find(i => i.handle === item.Handle).id;
+		: result.find(i => i.handle === item.Handle)?.id;
 };
 
 export const handleOrIDCheck = (item, result) => {
@@ -165,9 +165,9 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 			since_id = data[options.type][data[options.type].length - 1].id;
 		}
 
-		for (const item of fileData) {
+		for (const [itemIndex, item] of fileData.entries()) {
 			// key for result output
-			const itemKey = item.ID || item.Handle;
+			const itemKey = item.ID || item.Handle || itemIndex;
 			output[itemKey] = {
 				itemKey,
 				'ID (ref)': itemIDForMatrixify(item, result),
