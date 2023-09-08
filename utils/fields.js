@@ -657,7 +657,7 @@ export const isMulti = (type, field) => {
 export const addPrefix = (object, prefix) => {
 	const obj = { ...object };
 
-	for (var key in obj) {
+	for (const key in obj) {
 		obj[prefix + '__' + key] = obj[key];
 		delete obj[key];
 	}

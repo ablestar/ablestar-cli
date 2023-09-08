@@ -338,8 +338,8 @@ export async function writeMatrixify(
  * @param {XLSX.WorkSheet} sheet worksheet.
  */
 export function sheetToCsv(sheet, fileName) {
-	var output_file_name = fileName;
-	var stream = XLSX.stream.to_csv(sheet, { rawNumbers: true });
+	const output_file_name = fileName;
+	const stream = XLSX.stream.to_csv(sheet, { rawNumbers: true });
 	stream.pipe(fs.createWriteStream(output_file_name));
 }
 

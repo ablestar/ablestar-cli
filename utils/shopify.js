@@ -83,6 +83,7 @@ export async function shopifyRESTApi(store, resource, method, query) {
 			sleep(10000);
 			return await shopifyRESTApi(store, resource, method, query);
 		}
+		throw error;
 	}
 	
 }

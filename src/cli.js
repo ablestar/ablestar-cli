@@ -2,7 +2,7 @@ import arg from 'arg';
 import inquirer from 'inquirer';
 import showHelp from './help.js';
 import chalk from 'chalk';
-import { generateFileName, validateApiKey, validateFileName, validateURL } from '../utils/index.js';
+import { generateFileName, jsonToSheet, sheetToCsv, validateApiKey, validateFileName, validateURL } from '../utils/index.js';
 import { verifyApiKey } from './verify.js';
 import ora from 'ora';
 import { run } from './main.js';
@@ -20,7 +20,7 @@ import fs from 'fs';
 import ini from 'ini';
 // import appRootPath from 'app-root-path';
 import versionCheck from './version-check.js';
-import { analyzeFile } from '../utils/import.js';
+import { analyzeFile, getHeaderColumn } from '../utils/import.js';
 import { actionTree } from '../utils/actions.js';
 
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
@@ -437,8 +437,7 @@ async function cli(args) {
 			console.log(chalk.bgCyan.black(' == Alternative Command == '));
 			console.log(
 				chalk.cyan(
-					`ablestar-cli ${options.method} ${options.type} ${options.url} --format=${
-						options.format
+					`ablestar-cli ${options.method} ${options.type} ${options.url} --format=${options.format
 					} --fileName=${options.fileName}${getGroup(options.type, options.fields)}`,
 				),
 			);
@@ -448,8 +447,23 @@ async function cli(args) {
 			options = await importOptions(options, fileData);
 
 			if (options.format === 'Matrixify') {
-				if (options.type === 'custom_collections') await runImportCustomCollection(options, fileData);
-				if (options.type === 'smart_collections') await runImportSmartCollection(options, fileData);
+				let outputData = {};
+				if (options.type === 'custom_collections') outputData = await runImportCustomCollection(options, fileData);
+				if (options.type === 'smart_collections') outputData = await runImportSmartCollection(options, fileData);
+
+				const outputJson = fileData.map((item, itemIndex) => {
+					const { itemKey, ...rest } = Object.values(outputData).find(i => i.itemKey === item.ID || i.itemKey === item.Handle || i.itemKey === itemIndex);
+					
+					return { ...item, ...rest }
+				})
+
+				const outputHeader = [await getHeaderColumn(options.fileName), ['ID (ref)', 'Handle (ref)', 'Import Result', 'Import Comment']].flat();
+
+				let worksheet;
+				const outputSheet = jsonToSheet(outputJson, 0, worksheet, 'output', outputHeader, outputHeader);
+				sheetToCsv(outputSheet, `${options.fileName}_Results.csv`);
+
+				console.log("Result Saved to ", chalk.greenBright(`${options.fileName}_Results.csv \n`));
 			}
 
 			else await runImport(options, fileData);

@@ -80,10 +80,12 @@ export async function runImport(options, fileData) {
 }
 
 export async function runImportCustomCollection(options, fileData) {
-	await runMatrixify(options, fileData, customCollectionQuery);
+	const output = await runMatrixify(options, fileData, customCollectionQuery);
+	return output;
 }
 
 export async function runImportSmartCollection(options, fileData) {
 	const groupData = groupSmartCollection(fileData);
-	await runMatrixify(options, groupData, smartCollectionQuery);
+	const output = await runMatrixify(options, groupData, smartCollectionQuery);
+	return output;
 }
