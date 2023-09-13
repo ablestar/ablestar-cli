@@ -11,6 +11,7 @@ import {
 	automatedCollectionFields,
 	customCollectionFields,
 	customerFields,
+	discountFields,
 	getGroup,
 	metaobjectEntriesFields,
 	orderFields,
@@ -144,6 +145,7 @@ export async function promptForMissingOptions(options) {
 				{ name: 'Automated Collection', value: 'smart_collections' },
 				{ name: 'Metaobject Definitions', value: 'metaobject_definitions' },
 				{ name: 'Metaobject Entries', value: 'metaobject_entries' },
+				{ name: 'Discounts', value: 'price_rules' },
 			],
 			default: defaultType,
 			when: () => !options.type,
@@ -204,6 +206,8 @@ export async function promptForMissingOptions(options) {
 					return automatedCollectionFields;
 				if (answers.type === 'metaobject_entries' || options.type === 'metaobject_entries')
 					return metaobjectEntriesFields;
+				if (answers.type === 'price_rules' || options.type === 'price_rules')
+					return discountFields;
 			},
 			multiple: true,
 			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject_definitions') && !options.type?.includes('metaobject_definitions')),

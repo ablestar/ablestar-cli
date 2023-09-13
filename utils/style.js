@@ -1395,6 +1395,132 @@ export const matrixifyStyles = {
 			fill: 'e3ffff',
 		},
 	},
+	'Price Rules': {
+		"ID": {
+			width: 16,
+			fill: 'FFBF00',
+			numFmt: '#',
+		},
+		"Title": {
+			width: 26,
+			fill: 'FFBF00',
+		},
+		"Command": {
+			width: 12,
+			fill: 'cbcbcb',
+		},
+		"Code": {
+			width: 26,
+			fill: 'A8BF00',
+		},
+		"Used Count": {
+			width: 14,
+			fill: 'A8BF00',
+		},
+		"Discount Type": {
+			width: 22,
+			fill: 'FFBF00',
+		},
+		"Discount Value": {
+			width: 16,
+			fill: 'FFBF00',
+		},
+		"Minimum Purchase Amount": {
+			width: 28,
+			fill: 'FFBF00',
+		},
+		"Limit Total Times": {
+			width: 18,
+			fill: 'FFBF00',
+		},
+		"Limit Once Per Customer": {
+			width: 24,
+			fill: 'FFBF00',
+		},
+		"Minimum Quantity Of Items": {
+			width: 22,
+			fill: 'FFBF00',
+		},
+		"Status": {
+			width: 16,
+			fill: 'FFBF00',
+		},
+		"Starts At": {
+			width: 18,
+			fill: 'FFBF00',
+		},
+		"Ends At": {
+			width: 18,
+			fill: 'FFBF00',
+		},
+		"Updated At": {
+			width: 18,
+			fill: 'FFBF00',
+		},
+		"Free Shipping: Country Codes": {
+			width: 26,
+			fill: 'FFE699',
+		},
+		"Free Shipping: Over Amount": {
+			width: 26,
+			fill: 'FFE699',
+		},
+		"Customer Buys: Quantity": {
+			width: 22,
+			fill: 'DDEBF7',
+		},
+		"Customer Buys: Collections": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Customer Buys: Products": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Customer Buys: Variants": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Customer Gets: Quantity": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Applies To: Collections": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Applies To: Products": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Applies To: Variants": {
+			width: 22,
+			fill: 'DDEBF7',
+			numFmt: '#',
+		},
+		"Customer Groups": {
+			width: 22,
+			fill: 'DDEBF7',
+		},
+		"Applies To: Customers": {
+			width: 22,
+			fill: 'DDEBF7',
+		},
+		'Row #': {
+			width: 12.17,
+			fill: 'cbcbcb',
+		},
+		'Top Row': {
+			width: 14.17,
+			fill: 'cbcbcb',
+		},
+	}
 };
 
 export const summaryHeader = [

@@ -7,6 +7,7 @@ import {
 	shopifyRESTApiCount,
 	shopifyRESTApiDomain,
 	shopifyRESTApiProductMetafield,
+	shopifyRESTApiSubList,
 	shopifyRESTApiVariantMetafield,
 } from '../utils/shopify.js';
 import {
@@ -138,6 +139,12 @@ export async function run(options) {
  else {
 		// Get total items count
 		const data = await shopifyRESTApiCount(options.url, options.type, 'get');
+		
+		if (!data) {
+			console.log(`No ${chalk.greenBright(`${options.type}`)} exist on store`)
+			console.log();
+			return;
+		}
 		bar1.start(data.count, 0);
 
 		const domainData = await shopifyRESTApiDomain(options.url, 'get');
@@ -191,7 +198,15 @@ export async function run(options) {
 			.sort(([a], [b]) => (a == 'variants' ? -1 : b == 'variants' ? 1 : 0))
 			.reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
 
+		if (options.type === 'price_rules') {
+			filters['entitled_collection_ids'] = [];
+			filters['entitled_product_ids'] = [];
+			filters['entitled_variant_ids'] = [];
 
+			filters['prerequisite_collection_ids'] = [];
+			filters['prerequisite_product_ids'] = [];
+			filters['prerequisite_variant_ids'] = [];
+		}
 		// Loop till result length === 0
 		while (true) {
 			const query = {
@@ -210,7 +225,7 @@ export async function run(options) {
 			const data = await shopifyRESTApi(options.url, options.type, 'get', query);
 			let filteredData = [];
 			// If type is custom_collection and user selects products export, then should fetch collection products for every collection.
-			if (options.type === 'custom_collections' && filters.products?.length) {
+			if ((options.type === 'custom_collections' && filters.products?.length) || options.type === 'price_rules') {
 				filteredData = await Promise.all(
 					data[options.type].map(async item => {
 						let products_data = {};
@@ -221,11 +236,22 @@ export async function run(options) {
 								{ fields: ['id'] },
 							);
 						}
+
+						if (options.type === 'price_rules' && filters.discount_codes?.length) {
+							const value = await shopifyRESTApiSubList(
+								options.url,
+								'price_rules',
+								item.id,
+								'discount_codes'
+							);
+
+							products_data = { discount_codes: value?.discount_codes || [] };
+						}
 						let temp = { ...item, ...products_data, domain: domainData.shop.domain };
 						bar1.increment(1);
 
 						for (const filter in filters) {
-							if (temp[filter]?.length) {
+							if (temp[filter]?.length || item[filter]?.length) {
 								if (isMain(options.type, filter)) {
 									if (!Array.isArray(temp))
 										temp = temp[filter].map((subItem, item_index) => {
@@ -243,7 +269,7 @@ export async function run(options) {
 									else {
 										const maxLength = Math.max(
 											temp.length,
-											temp[filter].length,
+											item[filter].length,
 										);
 										for (let i = 0; i < maxLength; i++) {
 											temp[i] = {
@@ -251,14 +277,14 @@ export async function run(options) {
 													? { ..._.omit(temp[i], [filter]) }
 													: {
 															..._.omit(
-																temp,
+																item,
 																Object.keys(filters).filter(key =>
 																	isMain(options.type, key),
 																),
 															),
 													  }),
 												...addPrefix(
-													_.pick(temp[filter][i], filters[filter]) || {},
+													(["string", "number"].includes(typeof item[filter][i])) ? { itemVal: item[filter][i] } : _.pick(item[filter][i], filters[filter]) || {},
 													filter,
 												),
 											};

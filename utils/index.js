@@ -210,6 +210,14 @@ export function getHeader(json, type, fields) {
 		}
 	}
 
+	if (type === "price_rules") {
+		keys = ArrayMove(keys, keys.findIndex(i => i === 'discount_codes__code'), header.findIndex(i => i === 'Command') + 1);
+		header = ArrayMove(header, header.findIndex(i => i === 'Code'), header.findIndex(i => i === 'Command') + 1);
+
+		keys = ArrayMove(keys, keys.findIndex(i => i === 'discount_codes__usage_count'), header.findIndex(i => i === 'Command') + 2);
+		header = ArrayMove(header, header.findIndex(i => i === 'Used Count'), header.findIndex(i => i === 'Command') + 2);
+	}
+
 	return { keys, header };
 }
 
@@ -292,8 +300,9 @@ export async function writeMatrixify(
 	await workbook.xlsx.readFile(fileName);
 
 	const worksheet = workbook.getWorksheet(sheetName);
+	const xSpliteValue = header.findIndex(i => i === 'ID') < 0 ? 1 : 2;
 	worksheet.views = [
-		{ state: 'frozen', xSplit: 2, ySplit: 1, topLeftCell: 'C2', activeCell: 'A1' },
+		{ state: 'frozen', xSplit: xSpliteValue, ySplit: 1, topLeftCell: 'C2', activeCell: 'A1' },
 	];
 	worksheet.properties.defaultRowHeight = 16;
 
@@ -369,3 +378,14 @@ export function numFromID (str) {
 	const match = str.match(/\d+$/);
 	return match ? match[0] : null;
 }
+
+function ArrayMove(arr, old_index, new_index) {
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length + 1;
+        while (k--) {
+            arr.push(undefined);
+        }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    return arr;
+};
