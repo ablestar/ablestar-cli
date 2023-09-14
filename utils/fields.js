@@ -423,8 +423,10 @@ export const fieldNames = {
 			minimum_purchase___prerequisite_subtotal_range: 'Minimum Purchase Amount',
 			usage_limit: 'Limit Total Times',
 			once_per_customer: 'Limit Once Per Customer',
-			// *Limit Once Per Order
-			// *Max Uses Per Order
+
+			limit_once___allocation_method: 'Limit Once Per Order',
+
+			allocation_limit: 'Max Uses Per Order',
 			prerequisite_quantity_range: 'Minimum Quantity Of Items',
 			status___starts_at: 'Status',
 
@@ -446,7 +448,7 @@ export const fieldNames = {
 			entitled_product_ids__itemVal: 'Applies To: Products',
 			entitled_variant_ids__itemVal: 'Applies To: Variants',
 
-			customer_segment_prerequisite_ids__itemVal: 'Customer Groups',
+			customer_segment_prerequisite_ids__itemVal: 'Applies To: Customer Groups',
 			prerequisite_customer_ids__itemVal: 'Applies To: Customers',
 
 			// prerequisite_shipping_price_range: 'prerequisite_shipping_price_range',
@@ -456,7 +458,6 @@ export const fieldNames = {
 			// target_type: 'target_type',
 			// target_selection: 'target_selection',
 			// allocation_method: 'allocation_method',
-			// allocation_limit: 'allocation_limit',
 
 			top_row_command: 'Top Row',
 			row_number_command: 'Row #',
@@ -487,6 +488,9 @@ export const fieldNames = {
 			is_main: true,
 		},
 		prerequisite_variant_ids: {
+			is_main: true,
+		},
+		prerequisite_customer_ids: {
 			is_main: true,
 		},
 	},
@@ -773,6 +777,12 @@ export const convertion = {
 					...obj,
 					status___starts_at: status,
 				};
+			},
+			limit_once(obj) {
+				return {
+					...obj,
+					limit_once___allocation_method: obj.value_type !== 'fixed_amount' ? null : obj.allocation_method === "across" ? true : false,
+				}
 			},
 		},
 	},

@@ -1437,6 +1437,14 @@ export const matrixifyStyles = {
 			width: 24,
 			fill: 'FFBF00',
 		},
+		"Limit Once Per Order": {
+			width: 24,
+			fill: 'FFBF00',
+		},
+		"Max Uses Per Order": {
+			width: 24,
+			fill: 'FFBF00',
+		},
 		"Minimum Quantity Of Items": {
 			width: 22,
 			fill: 'FFBF00',
@@ -1504,13 +1512,14 @@ export const matrixifyStyles = {
 			fill: 'DDEBF7',
 			numFmt: '#',
 		},
-		"Customer Groups": {
+		"Applies To: Customer Groups": {
 			width: 22,
 			fill: 'DDEBF7',
 		},
 		"Applies To: Customers": {
 			width: 22,
 			fill: 'DDEBF7',
+			numFmt: '#',
 		},
 		'Row #': {
 			width: 12.17,

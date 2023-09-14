@@ -206,6 +206,7 @@ export async function run(options) {
 			filters['prerequisite_collection_ids'] = [];
 			filters['prerequisite_product_ids'] = [];
 			filters['prerequisite_variant_ids'] = [];
+			filters['prerequisite_customer_ids'] = [];
 		}
 		// Loop till result length === 0
 		while (true) {
@@ -249,7 +250,7 @@ export async function run(options) {
 						}
 						let temp = { ...item, ...products_data, domain: domainData.shop.domain };
 						bar1.increment(1);
-
+console.log(temp)
 						for (const filter in filters) {
 							if (temp[filter]?.length || item[filter]?.length) {
 								if (isMain(options.type, filter)) {
@@ -617,7 +618,7 @@ export async function run(options) {
 			}
 			// Flat the filteredData because it might be nested array.
 			const flatData = filteredData.flat();
-
+// console.log(flatData)
 			if (data[options.type].length === 0) break;
 
 			result = [...result, ...flatData];
