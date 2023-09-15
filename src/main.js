@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import {
 	shopifyGraphMetaobject,
 	shopifyGraphMetaobjectEntries,
+	shopifyItemRESTApi,
 	shopifyRESTApi,
 	shopifyRESTApiCollectionProducts,
 	shopifyRESTApiCount,
@@ -250,7 +251,7 @@ export async function run(options) {
 						}
 						let temp = { ...item, ...products_data, domain: domainData.shop.domain };
 						bar1.increment(1);
-console.log(temp)
+
 						for (const filter in filters) {
 							if (temp[filter]?.length || item[filter]?.length) {
 								if (isMain(options.type, filter)) {
@@ -273,6 +274,23 @@ console.log(temp)
 											item[filter].length,
 										);
 										for (let i = 0; i < maxLength; i++) {
+											let itemHandle = null;
+											let customerEmail = null;
+											if (options.type === "price_rules" && ["string", "number"].includes(typeof item[filter][i]) && filter.includes("ids")) {
+												if (filter.includes("product_ids")) {
+													const itemValue = await shopifyItemRESTApi(options.url, 'products', item[filter][i], 'get');
+													itemHandle = itemValue?.product?.handle;
+												} else if (filter.includes("collection_ids")) {
+													const itemValue = await shopifyItemRESTApi(options.url, 'collections', item[filter][i], 'get');
+													itemHandle = itemValue?.collection?.handle;
+												} else if (filter.includes("variant_ids")) {
+													const itemValue = await shopifyItemRESTApi(options.url, 'variants', item[filter][i], 'get');
+													itemHandle = itemValue?.variant?.handle;
+												} else if (filter.includes("customer_ids")) {
+													const itemValue = await shopifyItemRESTApi(options.url, 'customers', item[filter][i], 'get');
+													customerEmail = itemValue?.customer?.email;
+												}
+											}
 											temp[i] = {
 												...(temp[i]
 													? { ..._.omit(temp[i], [filter]) }
@@ -285,7 +303,7 @@ console.log(temp)
 															),
 													  }),
 												...addPrefix(
-													(["string", "number"].includes(typeof item[filter][i])) ? { itemVal: item[filter][i] } : _.pick(item[filter][i], filters[filter]) || {},
+													(["string", "number"].includes(typeof item[filter][i])) ? { itemVal: itemHandle ?? item[filter][i], ...(customerEmail ? { customerEmail } : {}) } : _.pick(item[filter][i], filters[filter]) || {},
 													filter,
 												),
 											};
@@ -618,7 +636,7 @@ console.log(temp)
 			}
 			// Flat the filteredData because it might be nested array.
 			const flatData = filteredData.flat();
-// console.log(flatData)
+
 			if (data[options.type].length === 0) break;
 
 			result = [...result, ...flatData];

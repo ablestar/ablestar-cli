@@ -1521,6 +1521,10 @@ export const matrixifyStyles = {
 			fill: 'DDEBF7',
 			numFmt: '#',
 		},
+		"Applies To: Customers Email": {
+			width: 26,
+			fill: 'DDEBF7',
+		},
 		'Row #': {
 			width: 12.17,
 			fill: 'cbcbcb',

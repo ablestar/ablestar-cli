@@ -450,6 +450,7 @@ export const fieldNames = {
 
 			customer_segment_prerequisite_ids__itemVal: 'Applies To: Customer Groups',
 			prerequisite_customer_ids__itemVal: 'Applies To: Customers',
+			prerequisite_customer_ids__customerEmail: 'Applies To: Customers Email',
 
 			// prerequisite_shipping_price_range: 'prerequisite_shipping_price_range',
 			// prerequisite_saved_search_ids: 'prerequisite_saved_search_ids',
