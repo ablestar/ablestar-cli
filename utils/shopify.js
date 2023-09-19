@@ -190,6 +190,32 @@ export async function shopifyRESTApiCollectionProducts(store, collectionId) {
 	}
 }
 
+export async function shopifyRESTApiSubList(store, type, mainId, subtype) {
+	const { apikey, token } = await getKeyToken(store);
+	try {
+		const response = await axios['get'](
+			`https://${apikey}:${token}@${store}/admin/api/${apiVersion}/${type}/${mainId}/${subtype}.json`,
+		);
+
+		return response.data;
+	} catch (error) {
+		if (error === 429) {
+			sleep(2000);
+			return await shopifyRESTApiSubList(store, type, mainId, subtype);
+		}
+		if (error === 443) {
+			sleep(5000);
+			return await shopifyRESTApiSubList(store, type, mainId, subtype);
+		}
+		if (error === 4077) {
+			sleep(10000);
+			return await shopifyRESTApiSubList(store, type, mainId, subtype);
+		}
+
+		throw error;
+	}
+}
+
 export async function shopifyRESTApiProductMetafield(store, productId) {
 	const { apikey, token } = await getKeyToken(store);
 	try {

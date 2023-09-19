@@ -400,19 +400,101 @@ export const fieldNames = {
 			handle: 'Handle',
 			command: 'Command',
 
-			displayName:"Display Name",
-			status:"Status",
-			updatedAt:"Updated At",
-			definitionHandle:"Definition: Handle",
-			definitionName:"Definition: Name",
-			top_row_command:"Top Row",
-			row_number_command:"Row #",
+			displayName: 'Display Name',
+			status: 'Status',
+			updatedAt: 'Updated At',
+			definitionHandle: 'Definition: Handle',
+			definitionName: 'Definition: Name',
+			top_row_command: 'Top Row',
+			row_number_command: 'Row #',
 		},
 		field: {
-			fieldKey:"Field",
-			fieldValue:"Value",
-		}
-	}
+			fieldKey: 'Field',
+			fieldValue: 'Value',
+		},
+	},
+	price_rules: {
+		basic: {
+			id: 'ID',
+			title: 'Title',
+			command: 'Command',
+			value_type: 'Discount Type',
+			value: 'Discount Value',
+			minimum_purchase___prerequisite_subtotal_range: 'Minimum Purchase Amount',
+			usage_limit: 'Limit Total Times',
+			once_per_customer: 'Limit Once Per Customer',
+
+			limit_once___allocation_method: 'Limit Once Per Order',
+
+			allocation_limit: 'Max Uses Per Order',
+			prerequisite_quantity_range: 'Minimum Quantity Of Items',
+			status___starts_at: 'Status',
+
+			starts_at: 'Starts At',
+			ends_at: 'Ends At',
+			updated_at: 'Updated At',
+
+			stringify___entitled_country_ids: 'Free Shipping: Country Codes',
+
+			over_amount___prerequisite_to_entitlement_purchase: 'Free Shipping: Over Amount',
+
+			minimum_quantity___prerequisite_to_entitlement_quantity_ratio:
+				'Customer Buys: Quantity',
+			prerequisite_collection_ids__itemVal: 'Customer Buys: Collections',
+			prerequisite_product_ids__itemVal: 'Customer Buys: Products',
+			prerequisite_variant_ids__itemVal: 'Customer Buys: Variants',
+			customer_gets___prerequisite_to_entitlement_quantity_ratio: 'Customer Gets: Quantity',
+			entitled_collection_ids__itemVal: 'Applies To: Collections',
+			entitled_product_ids__itemVal: 'Applies To: Products',
+			entitled_variant_ids__itemVal: 'Applies To: Variants',
+
+			customer_segment_prerequisite_ids__itemVal: 'Applies To: Customer Groups',
+			prerequisite_customer_ids__itemVal: 'Applies To: Customers',
+			prerequisite_customer_ids__customerEmail: 'Applies To: Customers Email',
+
+			// prerequisite_shipping_price_range: 'prerequisite_shipping_price_range',
+			// prerequisite_saved_search_ids: 'prerequisite_saved_search_ids',
+			// admin_graphql_api_id: 'admin_graphql_api_id',
+			// customer_selection: 'customer_selection',
+			// target_type: 'target_type',
+			// target_selection: 'target_selection',
+			// allocation_method: 'allocation_method',
+
+			top_row_command: 'Top Row',
+			row_number_command: 'Row #',
+		},
+		discount_codes: {
+			is_main: true,
+			code: 'Code',
+			usage_count: 'Used Count',
+			// created_at: 'created_at',
+			// updated_at: 'updated_at',
+			// id: 'id',
+			// price_rule_id: 'price_rule_id',
+		},
+		entitled_collection_ids: {
+			is_main: true,
+		},
+		entitled_product_ids: {
+			is_main: true,
+		},
+		entitled_variant_ids: {
+			is_main: true,
+		},
+
+		prerequisite_collection_ids: {
+			is_main: true,
+		},
+		prerequisite_product_ids: {
+			is_main: true,
+		},
+		prerequisite_variant_ids: {
+			is_main: true,
+		},
+		prerequisite_customer_ids: {
+			is_main: true,
+		},
+	},
 };
 
 // Functions for all expor type.
@@ -438,10 +520,13 @@ export const convertion = {
 				};
 			},
 			time_conv: timeConv,
-			h_product: (obj) => {
+			h_product: obj => {
 				let adds = {};
 				for (const meta in obj.metafields) {
-					adds = { ...adds, [`h_product__${obj.metafields[meta]?.key}`]: obj.metafields[meta]?.value };
+					adds = {
+						...adds,
+						[`h_product__${obj.metafields[meta]?.key}`]: obj.metafields[meta]?.value,
+					};
 				}
 
 				return {
@@ -449,9 +534,8 @@ export const convertion = {
 					...adds,
 				};
 			},
-			h_variant: (obj) => obj,
+			h_variant: obj => obj,
 		},
-		
 	},
 	orders: {
 		basic: {
@@ -643,6 +727,66 @@ export const convertion = {
 			time_conv: timeConv,
 		},
 	},
+	price_rules: {
+		basic: {
+			stringify(obj) {
+				return {
+					...obj,
+					stringify___entitled_country_ids: obj.entitled_country_ids.toString(),
+				};
+			},
+			minimum_purchase(obj) {
+				return {
+					...obj,
+					minimum_purchase___prerequisite_subtotal_range:
+						obj.prerequisite_subtotal_range?.greater_than_or_equal_to,
+				};
+			},
+			over_amount(obj) {
+				return {
+					...obj,
+					over_amount___prerequisite_to_entitlement_purchase:
+						obj.prerequisite_to_entitlement_purchase?.prerequisite_amount,
+				};
+			},
+			minimum_quantity(obj) {
+				return {
+					...obj,
+					minimum_quantity___prerequisite_to_entitlement_quantity_ratio:
+						obj.prerequisite_to_entitlement_quantity_ratio?.prerequisite_quantity,
+				};
+			},
+			customer_gets(obj) {
+				return {
+					...obj,
+					customer_gets___prerequisite_to_entitlement_quantity_ratio:
+						obj.prerequisite_to_entitlement_quantity_ratio?.entitled_quantity,
+				};
+			},
+			status(obj) {
+				const now = new Date();
+				const startDate = new Date(obj.starts_at);
+				const endDate = new Date(obj.ends_at);
+				const status =
+					now - startDate > 0 && (!obj.ends_at || endDate > now)
+						? 'Active'
+						: now - startDate < 0
+						? 'Scheduled'
+						: 'Expired';
+
+				return {
+					...obj,
+					status___starts_at: status,
+				};
+			},
+			limit_once(obj) {
+				return {
+					...obj,
+					limit_once___allocation_method: obj.value_type !== 'fixed_amount' ? null : obj.allocation_method === "across" ? true : false,
+				}
+			},
+		},
+	},
 };
 
 export const isMain = (type, field) => {
@@ -815,6 +959,20 @@ export const metaobjectEntriesFields = [
 	},
 ];
 
+export const discountFields = [
+	{
+		value: 'basic',
+		name: 'Product rules',
+		open: true,
+		children: makeOptions(fieldNames.price_rules.basic),
+	},
+	{
+		name: 'Discount codes',
+		value: 'discount_codes',
+		children: makeOptions(fieldNames.price_rules.discount_codes),
+	},
+];
+
 export function defaultFields(type) {
 	switch (type) {
 		case 'products':
@@ -910,7 +1068,16 @@ export function addFields(format, type, fields) {
 				'top_row_command-basic',
 				...(!fields.includes('id-basic') ? ['id-basic'] : []),
 				...(!fields.includes('handle-basic') ? ['handle-basic'] : []),
-			]
+			];
+
+		case 'price_rules':
+			return [
+				'command-basic',
+				'row_number_command-basic',
+				'top_row_command-basic',
+				...(!fields.includes('id-basic') ? ['id-basic'] : []),
+				...(!fields.includes('code-discount_codes') ? ['code-discount_codes'] : []),
+			];
 
 		default:
 			return [];
@@ -941,6 +1108,7 @@ export function addValues(format, type, item, index) {
 		case 'smart_collections':
 		case 'custom_collections':
 		case 'metaobject_entries':
+		case 'price_rules':
 			return {
 				command: 'MERGE',
 				row_number_command: index + 1,
@@ -1020,12 +1188,23 @@ export function getGroup(type, fields) {
 
 	for (const item of Object.keys(filters)) {
 		if (item === 'metafields') {
-			string += ` ${filters[item].map(i => `--group=${i === 'h_product___metafields' ? 'product_metafields' : 'variant_metafields'}`).join(' ')}`;
+			string += ` ${filters[item]
+				.map(
+					i =>
+						`--group=${
+							i === 'h_product___metafields'
+								? 'product_metafields'
+								: 'variant_metafields'
+						}`,
+				)
+				.join(' ')}`;
 			continue;
 		}
-		const totalLength = fieldNames[type][item] ? Object.keys(fieldNames[type][item]).filter(
-			i => i !== 'is_main' && !i.includes('command') && i !== 'is_multi',
-		).length : NaN;
+		const totalLength = fieldNames[type][item]
+			? Object.keys(fieldNames[type][item]).filter(
+					i => i !== 'is_main' && !i.includes('command') && i !== 'is_multi',
+			  ).length
+			: NaN;
 		if (filters[item].length === totalLength) string += ` --group=${item}`;
 		else string += ` ${filters[item].map(i => `--fields=${i}-${item}`).join(' ')}`;
 	}
@@ -1047,9 +1226,9 @@ export function getFieldsFromGroup(options) {
 			}
 			fields = [
 				...fields,
-				...Object.keys(fieldNames[options.type][groupItem]).filter(
-					i => i !== 'is_main' && !i.includes('command') && i !== 'is_multi',
-				).map(f => `${f}-${groupItem}`),
+				...Object.keys(fieldNames[options.type][groupItem])
+					.filter(i => i !== 'is_main' && !i.includes('command') && i !== 'is_multi')
+					.map(f => `${f}-${groupItem}`),
 			];
 		}
 	}
