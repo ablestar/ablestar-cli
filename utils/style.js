@@ -1533,6 +1533,60 @@ export const matrixifyStyles = {
 			width: 14.17,
 			fill: 'cbcbcb',
 		},
+	},
+	Pages: {
+		'ID': {
+			width: 16,
+			fill: 'FFFF00',
+		},
+		'Handle': {
+			width: 24,
+			fill: 'FFFF00',
+		},
+		'Command': {
+			width: 12,
+			fill: 'cbcbcb',
+		},
+		'Title': {
+			width: 24,
+			fill: 'FFFF00',
+		},
+		'Author': {
+			width: 24,
+			fill: 'FFFF00',
+		},
+		'Body HTML': {
+			width: 40,
+			fill: 'FFFF00',
+		},
+		'Created At': {
+			width: 14,
+			fill: 'FFFF00',
+		},
+		'Updated At': {
+			width: 14,
+			fill: 'FFFF00',
+		},
+		'Published': {
+			width: 14,
+			fill: 'FFFF00',
+		},
+		'Published At': {
+			width: 14,
+			fill: 'FFFF00',
+		},
+		'Template Suffix': {
+			width: 18,
+			fill: 'FFFF00',
+		},
+		'Row #': {
+			width: 12.17,
+			fill: 'cbcbcb',
+		},
+		'Top Row': {
+			width: 14.17,
+			fill: 'cbcbcb',
+		},
 	}
 };
 

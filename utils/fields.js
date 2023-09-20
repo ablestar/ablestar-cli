@@ -495,6 +495,24 @@ export const fieldNames = {
 			is_main: true,
 		},
 	},
+	pages: {
+		basic: {
+			id: 'ID',
+			handle: 'Handle',
+			command: 'Command',
+			title: 'Title',
+			author: 'Author',
+			body_html: 'Body HTML',
+			created_at: 'Created At',
+			updated_at: 'Updated At',
+			published___published_at: 'Published',
+			published_at: 'Published At',
+			template_suffix: 'Template Suffix',
+
+			row_number_command: 'Row #',
+			top_row_command: 'Top Row',
+		},
+	},
 };
 
 // Functions for all expor type.
@@ -782,8 +800,23 @@ export const convertion = {
 			limit_once(obj) {
 				return {
 					...obj,
-					limit_once___allocation_method: obj.value_type !== 'fixed_amount' ? null : obj.allocation_method === "across" ? true : false,
-				}
+					limit_once___allocation_method:
+						obj.value_type !== 'fixed_amount'
+							? null
+							: obj.allocation_method === 'across'
+							? true
+							: false,
+				};
+			},
+		},
+	},
+	pages: {
+		basic: {
+			published(obj) {
+				return {
+					...obj,
+					published___published_at: !!obj.published_at,
+				};
 			},
 		},
 	},
@@ -972,6 +1005,14 @@ export const discountFields = [
 		children: makeOptions(fieldNames.price_rules.discount_codes),
 	},
 ];
+export const pagesFields = [
+	{
+		value: 'basic',
+		name: 'Basic',
+		open: true,
+		children: makeOptions(fieldNames.pages.basic),
+	},
+];
 
 export function defaultFields(type) {
 	switch (type) {
@@ -1012,6 +1053,7 @@ export function addFields(format, type, fields) {
 				...(fields.includes('src-images') ? ['image_command-images'] : []),
 			];
 		case 'smart_collections':
+		case 'pages':
 			return [
 				'command-basic',
 				'row_number_command-basic',
@@ -1109,6 +1151,7 @@ export function addValues(format, type, item, index) {
 		case 'custom_collections':
 		case 'metaobject_entries':
 		case 'price_rules':
+		case 'pages':
 			return {
 				command: 'MERGE',
 				row_number_command: index + 1,

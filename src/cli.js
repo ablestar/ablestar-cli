@@ -15,6 +15,7 @@ import {
 	getGroup,
 	metaobjectEntriesFields,
 	orderFields,
+	pagesFields,
 	productFields,
 } from '../utils/fields.js';
 import fs from 'fs';
@@ -146,6 +147,7 @@ export async function promptForMissingOptions(options) {
 				{ name: 'Metaobject Definitions', value: 'metaobject_definitions' },
 				{ name: 'Metaobject Entries', value: 'metaobject_entries' },
 				{ name: 'Discounts', value: 'price_rules' },
+				{ name: 'Pages', value: 'pages' },
 			],
 			default: defaultType,
 			when: () => !options.type,
@@ -208,6 +210,7 @@ export async function promptForMissingOptions(options) {
 					return metaobjectEntriesFields;
 				if (answers.type === 'price_rules' || options.type === 'price_rules')
 					return discountFields;
+				if (answers.type === 'pages' || options.type === 'pages') return pagesFields;
 			},
 			multiple: true,
 			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject_definitions') && !options.type?.includes('metaobject_definitions')),
