@@ -1587,6 +1587,117 @@ export const matrixifyStyles = {
 			width: 14.17,
 			fill: 'cbcbcb',
 		},
+	},
+	Blogs: {
+		'ID': {
+			width: 16,
+			fill: 'C9C6FF',
+			numFmt: '#',
+		},
+		'Handle': {
+			width: 24,
+			fill: 'C9C6FF',
+		},
+		"Command": {
+			width: 12,
+			fill: 'cbcbcb',
+		},
+		'Title': {
+			width: 24,
+			fill: 'C9C6FF',
+		},
+		'Author': {
+			width: 14,
+			fill: 'C9C6FF',
+		},
+		'Body HTML': {
+			width: 56,
+			fill: 'C9C6FF',
+		},
+		'Summary HTML': {
+			width: 34,
+			fill: 'C9C6FF',
+		},
+		'Tags': {
+			width: 20,
+			fill: 'C9C6FF',
+		},
+		'Tags Command': {
+			width: 22,
+			fill: 'cbcbcb',
+		},
+		'Created At': {
+			width: 24,
+			fill: 'C9C6FF',
+		},
+		'Updated At': {
+			width: 24,
+			fill: 'C9C6FF',
+		},
+		'Published': {
+			width: 14,
+			fill: 'C9C6FF',
+		},
+		'Published At': {
+			width: 24,
+			fill: 'C9C6FF',
+		},
+		'Template Suffix': {
+			width: 16,
+			fill: 'C9C6FF',
+		},
+		'Image Src': {
+			width: 24,
+			fill: 'FFF2CC',
+		},
+		'Image Width': {
+			width: 16,
+			fill: 'FFF2CC',
+		},
+		'Image Height': {
+			width: 16,
+			fill: 'FFF2CC',
+		},
+		'Image Alt Text': {
+			width: 26,
+			fill: 'FFF2CC',
+		},
+		'Blog: ID': {
+			width: 16,
+			fill: '00FFFF',
+		},
+		'Blog: Handle': {
+			width: 20,
+			fill: '00FFFF',
+		},
+		'Blog: Title': {
+			width: 20,
+			fill: '00FFFF',
+		},
+		'Blog: Commentable': {
+			width: 22,
+			fill: '00FFFF',
+		},
+		'Blog: Feedburner URL': {
+			width: 26,
+			fill: '00FFFF',
+		},
+		'Blog: Feedburner Path': {
+			width: 26,
+			fill: '00FFFF',
+		},
+		'Blog: Template Suffix': {
+			width: 26,
+			fill: '00FFFF',
+		},
+		'Blog: Created At': {
+			width: 26,
+			fill: '00FFFF',
+		},
+		'Blog: Updated At': {
+			width: 26,
+			fill: '00FFFF',
+		},
 	}
 };
 
