@@ -9,12 +9,14 @@ import { run } from './main.js';
 import TreePrompt from './treePrompt.js';
 import {
 	automatedCollectionFields,
+	blogsFields,
 	customCollectionFields,
 	customerFields,
 	discountFields,
 	getGroup,
 	metaobjectEntriesFields,
 	orderFields,
+	pagesFields,
 	productFields,
 } from '../utils/fields.js';
 import fs from 'fs';
@@ -146,6 +148,8 @@ export async function promptForMissingOptions(options) {
 				{ name: 'Metaobject Definitions', value: 'metaobject_definitions' },
 				{ name: 'Metaobject Entries', value: 'metaobject_entries' },
 				{ name: 'Discounts', value: 'price_rules' },
+				{ name: 'Pages', value: 'pages' },
+				{ name: 'Blog Posts', value: 'blogs' },
 			],
 			default: defaultType,
 			when: () => !options.type,
@@ -208,6 +212,8 @@ export async function promptForMissingOptions(options) {
 					return metaobjectEntriesFields;
 				if (answers.type === 'price_rules' || options.type === 'price_rules')
 					return discountFields;
+				if (answers.type === 'pages' || options.type === 'pages') return pagesFields;
+				if (answers.type === 'blogs' || options.type === 'blogs') return blogsFields;
 			},
 			multiple: true,
 			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject_definitions') && !options.type?.includes('metaobject_definitions')),

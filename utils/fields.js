@@ -495,6 +495,62 @@ export const fieldNames = {
 			is_main: true,
 		},
 	},
+	pages: {
+		basic: {
+			id: 'ID',
+			handle: 'Handle',
+			command: 'Command',
+			title: 'Title',
+			author: 'Author',
+			body_html: 'Body HTML',
+			created_at: 'Created At',
+			updated_at: 'Updated At',
+			published___published_at: 'Published',
+			published_at: 'Published At',
+			template_suffix: 'Template Suffix',
+
+			row_number_command: 'Row #',
+			top_row_command: 'Top Row',
+		},
+	},
+	blogs: {
+		articles: {
+			is_main: true,
+			
+			id: 'ID',
+			handle: 'Handle',
+			command: "Command",
+
+			title: 'Title',
+			author: 'Author',
+			body_html: 'Body HTML',
+			summary_html: 'Summary HTML',
+			tags: 'Tags',
+			tags_command: 'Tags Command',
+
+			created_at: 'Created At',
+			updated_at: 'Updated At',
+			published___published_at: 'Published',
+			published_at: 'Published At',
+			template_suffix: 'Template Suffix',
+			image__src___image: 'Image Src',
+			image__width___image: 'Image Width',
+			image__height___image: 'Image Height',
+			image__alt___image: 'Image Alt Text',
+		},
+		basic: {
+			id: 'Blog: ID',
+			handle: 'Blog: Handle',
+			title: 'Blog: Title',
+			commentable: 'Blog: Commentable',
+			feedburner: 'Blog: Feedburner URL',
+			feedburner_location: 'Blog: Feedburner Path',
+			template_suffix: 'Blog: Template Suffix',
+
+			created_at: 'Blog: Created At',
+			updated_at: 'Blog: Updated At',
+		},
+	},
 };
 
 // Functions for all expor type.
@@ -782,11 +838,42 @@ export const convertion = {
 			limit_once(obj) {
 				return {
 					...obj,
-					limit_once___allocation_method: obj.value_type !== 'fixed_amount' ? null : obj.allocation_method === "across" ? true : false,
-				}
+					limit_once___allocation_method:
+						obj.value_type !== 'fixed_amount'
+							? null
+							: obj.allocation_method === 'across'
+							? true
+							: false,
+				};
 			},
 		},
 	},
+	pages: {
+		basic: {
+			published(obj) {
+				return {
+					...obj,
+					published___published_at: !!obj.published_at,
+				};
+			},
+		},
+	},
+	blogs: {
+		articles: {
+			image: (obj, field) => {
+				return {
+					...obj,
+					[`image__${field}___image`]: obj.articles__image?.[field],
+				};
+			},
+			published: obj => {
+				return {
+					...obj,
+					published___published_at: !!obj.articles__published_at,
+				};
+			},
+		}
+	}
 };
 
 export const isMain = (type, field) => {
@@ -972,6 +1059,29 @@ export const discountFields = [
 		children: makeOptions(fieldNames.price_rules.discount_codes),
 	},
 ];
+export const pagesFields = [
+	{
+		value: 'basic',
+		name: 'Basic',
+		open: true,
+		children: makeOptions(fieldNames.pages.basic),
+	},
+];
+
+export const blogsFields = [
+	{
+		value: 'articles',
+		name: 'Blog Posts',
+		open: true,
+		children: makeOptions(fieldNames.blogs.articles),
+	},
+	{
+		value: 'basic',
+		name: 'Blog',
+		open: false,
+		children: makeOptions(fieldNames.blogs.basic),
+	},
+];
 
 export function defaultFields(type) {
 	switch (type) {
@@ -1012,6 +1122,7 @@ export function addFields(format, type, fields) {
 				...(fields.includes('src-images') ? ['image_command-images'] : []),
 			];
 		case 'smart_collections':
+		case 'pages':
 			return [
 				'command-basic',
 				'row_number_command-basic',
@@ -1078,6 +1189,15 @@ export function addFields(format, type, fields) {
 				...(!fields.includes('id-basic') ? ['id-basic'] : []),
 				...(!fields.includes('code-discount_codes') ? ['code-discount_codes'] : []),
 			];
+		case 'blogs':
+			return [
+				'command-articles',
+				'row_number_command-basic',
+				'top_row_command-basic',
+				...(!fields.includes('id-basic') ? ['id-basic'] : []),
+				...(!fields.includes('handle-basic') ? ['handle-basic'] : []),
+				...(fields.includes('tags-articles') ? ['tags_command-articles'] : []),
+			]
 
 		default:
 			return [];
@@ -1109,6 +1229,7 @@ export function addValues(format, type, item, index) {
 		case 'custom_collections':
 		case 'metaobject_entries':
 		case 'price_rules':
+		case 'pages':
 			return {
 				command: 'MERGE',
 				row_number_command: index + 1,
@@ -1132,6 +1253,15 @@ export function addValues(format, type, item, index) {
 				cancel_send_receipt: false,
 				cancel_refund: false,
 				client_details__row_number_command: index + 1,
+			};
+
+		case 'blogs':
+			return {
+				articles__command: 'MERGE',
+				articles__tags_command: 'REPLACE',
+				row_number_command: index + 1,
+				variants__variant_command: item.variants__id ? 'MERGE' : '',
+				images__image_command: item.images__src ? 'MERGE' : '',
 			};
 
 		default:

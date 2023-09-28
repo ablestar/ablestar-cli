@@ -227,7 +227,7 @@ export async function run(options) {
 			const data = await shopifyRESTApi(options.url, options.type, 'get', query);
 			let filteredData = [];
 			// If type is custom_collection and user selects products export, then should fetch collection products for every collection.
-			if ((options.type === 'custom_collections' && filters.products?.length) || options.type === 'price_rules') {
+			if ((options.type === 'custom_collections' && filters.products?.length) || options.type === 'price_rules' || options.type === 'blogs') {
 				filteredData = await Promise.all(
 					data[options.type].map(async item => {
 						let products_data = {};
@@ -248,6 +248,16 @@ export async function run(options) {
 							);
 
 							products_data = { discount_codes: value?.discount_codes || [] };
+						}
+						if (options.type === 'blogs' && filters.articles?.length) {
+							const value = await shopifyRESTApiSubList(
+								options.url,
+								'blogs',
+								item.id,
+								'articles'
+							);
+
+							products_data = { articles: value?.articles || [] };
 						}
 						let temp = { ...item, ...products_data, domain: domainData.shop.domain };
 						bar1.increment(1);
