@@ -68,6 +68,24 @@ export const customCollectionQuery = (item, result, showId = false) => {
 	};
 };
 
+export const pagesQuery = (item, result, showId = false) => {
+	return {
+		page: {
+			...(showId
+				? {
+						id: itemIDForMatrixify(item, result),
+				  }
+				: {}),
+			handle: item.Handle,
+			title: item.Title,
+			body_html: item['Body HTML'],
+			published: item.Published,
+			template_suffix: item['Template Suffix'],
+		},
+	};
+};
+
+
 export const groupSmartCollection = inputJson => {
 	if (!inputJson || !inputJson.length) return [];
 
@@ -149,7 +167,7 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		while (true) {
 			const query = {
 				params: {
-					fields: ['id', 'handle'],
+					fields: ['id', 'handle'].join(','),
 					since_id,
 					limit,
 				},
