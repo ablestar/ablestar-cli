@@ -28,7 +28,7 @@ import { actionTree } from '../utils/actions.js';
 
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import fuzzyPath from 'inquirer-fuzzy-path';
-import { runImport, runImportCustomCollection, runImportPages, runImportSmartCollection } from './import.js';
+import { runImport, runImportArticles, runImportCustomCollection, runImportPages, runImportSmartCollection } from './import.js';
 import os from 'os';
 
 const appRootPath = { path: os.homedir() };
@@ -336,6 +336,7 @@ async function importOptions(options, fileData) {
 				{ name: 'Manual Collection', value: 'custom_collections' },
 				{ name: 'Automated Collection', value: 'smart_collections' },
 				{ name: 'Pages', value: 'pages' },
+				{ name: 'Blog Posts', value: 'articles' },
 			],
 			default: defaultType,
 			when: () => !options.type,
@@ -462,6 +463,7 @@ async function cli(args) {
 				if (options.type === 'custom_collections') outputData = await runImportCustomCollection(options, fileData);
 				if (options.type === 'smart_collections') outputData = await runImportSmartCollection(options, fileData);
 				if (options.type === 'pages') outputData = await runImportPages(options, fileData);
+				if (options.type === 'articles') outputData = await runImportArticles(options, fileData);
 
 				const outputJson = fileData.map((item, itemIndex) => {
 					const { itemKey, ...rest } = Object.values(outputData).find(i => i.itemKey === item.ID || i.itemKey === item.Handle || i.itemKey === itemIndex);

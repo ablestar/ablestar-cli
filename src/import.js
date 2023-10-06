@@ -1,4 +1,4 @@
-import { customCollectionQuery, groupSmartCollection, pagesQuery, runMatrixify, smartCollectionQuery } from '../utils/import.js';
+import { articlesQuery, customCollectionQuery, groupSmartCollection, pagesQuery, runMatrixify, smartCollectionQuery } from '../utils/import.js';
 import { shopifyRESTApi, shopifyRESTApiSingle } from '../utils/shopify.js';
 import cliProgress from 'cli-progress';
 
@@ -92,5 +92,10 @@ export async function runImportSmartCollection(options, fileData) {
 
 export async function runImportPages(options, fileData) {
 	const output = await runMatrixify(options, fileData, pagesQuery);
+	return output;
+}
+
+export async function runImportArticles(options, fileData) {
+	const output = await runMatrixify(options, fileData, articlesQuery, true);
 	return output;
 }
