@@ -1,7 +1,12 @@
 import fs from 'fs';
 import XLSX from 'xlsx';
 import cliProgress from 'cli-progress';
-import { shopifyItemRESTApi, shopifyRESTApi } from './shopify.js';
+import {
+	shopifyItemRESTApi,
+	shopifyRESTApi,
+	shopifyRESTApiSubItem,
+	shopifyRESTApiSubList,
+} from './shopify.js';
 
 export async function analyzeFile(fileName) {
 	let fileContent;
@@ -22,7 +27,9 @@ export async function getHeaderColumn(fileName) {
 	if (await fs.existsSync(fileName)) {
 		const workbook = XLSX.readFile(fileName);
 		const sheet_name_list = workbook.SheetNames;
-		const columnsArray = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], { header: 1 })[0];
+		const columnsArray = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]], {
+			header: 1,
+		})[0];
 
 		return columnsArray;
 	} else {
@@ -64,6 +71,48 @@ export const customCollectionQuery = (item, result, showId = false) => {
 				src: item['Image Src'],
 				alt: item['Image Alt Text'],
 			},
+		},
+	};
+};
+
+export const pagesQuery = (item, result, showId = false) => {
+	return {
+		page: {
+			...(showId
+				? {
+						id: itemIDForMatrixify(item, result),
+				  }
+				: {}),
+			handle: item.Handle,
+			title: item.Title,
+			body_html: item['Body HTML'],
+			published: item.Published,
+			template_suffix: item['Template Suffix'],
+		},
+	};
+};
+
+export const articlesQuery = (item, result, showId = false) => {
+	return {
+		article: {
+			...(showId
+				? {
+						id: itemIDForMatrixify(item, result),
+				  }
+				: {}),
+			blog_id: item['Blog: ID'],
+			handle: item.Handle,
+			title: item.Title,
+			body_html: item['Body HTML'],
+			summary_html: item['Summary HTML'],
+			published: item.Published,
+			published_at: item['Published At'],
+			template_suffix: item['Template Suffix'],
+			image: {
+				src: item['Image Src'],
+				// alt: item['Image Alt Text'],
+			},
+			tags: item.Tags,
 		},
 	};
 };
@@ -124,7 +173,12 @@ export const smartCollectionQuery = (item, result, showId = false) => {
 	};
 };
 
-export const runMatrixify = async (options, fileData, queryBuilder = customCollectionQuery) => {
+export const runMatrixify = async (
+	options,
+	fileData,
+	queryBuilder = customCollectionQuery,
+	isSubType = false,
+) => {
 	const bar1 = new cliProgress.SingleBar(
 		{
 			format: `[{bar}] {percentage}% | DUR: {duration}s | ETA: {eta}s | {value}/{total}`,
@@ -149,7 +203,7 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		while (true) {
 			const query = {
 				params: {
-					fields: ['id', 'handle'],
+					fields: ['id', 'handle'].join(','),
 					since_id,
 					limit,
 				},
@@ -166,6 +220,21 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		}
 
 		for (const [itemIndex, item] of fileData.entries()) {
+			// values for isSubType = true;
+			let mainId = null;
+			let subId = null;
+			let mainType = null;
+			let subType = null;
+
+			if (isSubType) {
+				if (options.type === 'articles') {
+					mainId = item['Blog: ID'];
+					subId = itemIDForMatrixify(item, result);
+					mainType = 'blogs';
+					subType = 'articles';
+				}
+			}
+
 			// key for result output
 			const itemKey = item.ID || item.Handle || itemIndex;
 			output[itemKey] = {
@@ -173,9 +242,9 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 				'ID (ref)': itemIDForMatrixify(item, result),
 				'Handle (ref)': item.Handle,
 				'Import Result': 'OK',
-				'Import Comment': ''
+				'Import Comment': '',
 			};
-			
+
 			switch (item.Command) {
 				case 'NEW':
 					output[itemKey]['Import Comment'] = 'New';
@@ -190,7 +259,16 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					const query = queryBuilder(item, result);
 
 					try {
-						await shopifyRESTApi(options.url, options.type, 'post', query);
+						if (isSubType)
+							await shopifyRESTApiSubList(
+								options.url,
+								mainType,
+								mainId,
+								subType,
+								'post',
+								query,
+							);
+						else await shopifyRESTApi(options.url, options.type, 'post', query);
 						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
@@ -205,19 +283,31 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
 							output[itemKey]['Import Result'] = 'Failed';
-							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
+							output[itemKey]['Import Comment'] =
+								'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
 						const query1 = queryBuilder(item, result, true);
 						try {
-							await shopifyItemRESTApi(
-								options.url,
-								options.type,
-								itemIDForMatrixify(item, result),
-								'put',
-								query1,
-							);
+							if (isSubType)
+								await shopifyRESTApiSubItem(
+									options.url,
+									mainType,
+									mainId,
+									subType,
+									subId,
+									'put',
+									query1,
+								);
+							else
+								await shopifyItemRESTApi(
+									options.url,
+									options.type,
+									itemIDForMatrixify(item, result),
+									'put',
+									query1,
+								);
 							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 						} catch (error) {
@@ -230,7 +320,16 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 
 					const query1 = queryBuilder(item, result);
 					try {
-						await shopifyRESTApi(options.url, options.type, 'post', query1);
+						if (isSubType)
+							await shopifyRESTApiSubList(
+								options.url,
+								mainType,
+								mainId,
+								subType,
+								'post',
+								query1,
+							);
+						else await shopifyRESTApi(options.url, options.type, 'post', query1);
 						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
@@ -245,19 +344,31 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
 							output[itemKey]['Import Result'] = 'Failed';
-							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
+							output[itemKey]['Import Comment'] =
+								'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
 						const query1 = queryBuilder(item, result, true);
 						try {
-							await shopifyItemRESTApi(
-								options.url,
-								options.type,
-								itemIDForMatrixify(item, result),
-								'put',
-								query1,
-							);
+							if (isSubType)
+								await shopifyRESTApiSubItem(
+									options.url,
+									mainType,
+									mainId,
+									subType,
+									subId,
+									'put',
+									query1,
+								);
+							else
+								await shopifyItemRESTApi(
+									options.url,
+									options.type,
+									itemIDForMatrixify(item, result),
+									'put',
+									query1,
+								);
 							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 						} catch (error) {
@@ -276,17 +387,28 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
 							output[itemKey]['Import Result'] = 'Failed';
-							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
+							output[itemKey]['Import Comment'] =
+								'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
 						try {
-							await shopifyItemRESTApi(
-								options.url,
-								options.type,
-								itemIDForMatrixify(item, result),
-								'delete',
-							);
+							if (isSubType)
+								await shopifyRESTApiSubItem(
+									options.url,
+									mainType,
+									mainId,
+									subType,
+									subId,
+									'delete',
+								);
+							else
+								await shopifyItemRESTApi(
+									options.url,
+									options.type,
+									itemIDForMatrixify(item, result),
+									'delete',
+								);
 						} catch (error) {
 							output[itemKey]['Import Result'] = 'Failed';
 							output[itemKey]['Import Comment'] = 'Error when tring to delete item.';
@@ -297,7 +419,16 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 
 					const query2 = queryBuilder(item, result);
 					try {
-						await shopifyRESTApi(options.url, options.type, 'post', query2);
+						if (isSubType)
+							await shopifyRESTApiSubList(
+								options.url,
+								mainType,
+								mainId,
+								subType,
+								'post',
+								query2,
+							);
+						else await shopifyRESTApi(options.url, options.type, 'post', query2);
 						output[itemKey]['Import Result'] = 'OK';
 						success += 1;
 					} catch (error) {
@@ -312,17 +443,28 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 					if (handleOrIDCheck(item, result)) {
 						if (!item.ID && !item.Handle) {
 							output[itemKey]['Import Result'] = 'Failed';
-							output[itemKey]['Import Comment'] = 'Should had ID or Handle to update item.';
+							output[itemKey]['Import Comment'] =
+								'Should had ID or Handle to update item.';
 							failed += 1;
 							break;
 						}
 						try {
-							await shopifyItemRESTApi(
-								options.url,
-								options.type,
-								itemIDForMatrixify(item, result),
-								'delete',
-							);
+							if (isSubType)
+								await shopifyRESTApiSubItem(
+									options.url,
+									mainType,
+									mainId,
+									subType,
+									subId,
+									'delete',
+								);
+							else
+								await shopifyItemRESTApi(
+									options.url,
+									options.type,
+									itemIDForMatrixify(item, result),
+									'delete',
+								);
 							output[itemKey]['Import Result'] = 'OK';
 							success += 1;
 							break;
@@ -363,4 +505,4 @@ export const runMatrixify = async (options, fileData, queryBuilder = customColle
 		bar1.stop();
 		throw error;
 	}
-}
+};
