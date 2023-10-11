@@ -9,6 +9,11 @@ import { capitalize, fieldNames } from './fields.js';
 import { matrixifyStyles, summaryHeader } from './style.js';
 import Excel from 'exceljs';
 import os from 'os';
+import { Readable } from 'stream';
+import * as cpexcel from 'xlsx/dist/cpexcel.full.mjs';
+XLSX.set_fs(fs);
+XLSX.stream.set_readable(Readable);
+XLSX.set_cptable(cpexcel);
 
 const appRootPath = { path: os.homedir() };
 

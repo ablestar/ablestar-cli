@@ -37,7 +37,10 @@
 		"ora": "^6.1.2",
 		"package-json": "^8.1.0",
 		"semver": "^7.3.8",
-		"xlsx": "^0.18.5"
+		"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
+	},
+	"dependenciesComments": {
+		"xlsx": "refer the version from https://docs.sheetjs.com/docs/getting-started/installation/nodejs/"
 	},
 	"devDependencies": {
 		"@babel/preset-env": "^7.20.2",
