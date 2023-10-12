@@ -7,6 +7,11 @@ import {
 	shopifyRESTApiSubItem,
 	shopifyRESTApiSubList,
 } from './shopify.js';
+import { Readable } from 'stream';
+import * as cpexcel from 'xlsx/dist/cpexcel.full.mjs';
+XLSX.set_fs(fs);
+XLSX.stream.set_readable(Readable);
+XLSX.set_cptable(cpexcel);
 
 export async function analyzeFile(fileName) {
 	let fileContent;
@@ -110,7 +115,7 @@ export const articlesQuery = (item, result, showId = false) => {
 			template_suffix: item['Template Suffix'],
 			image: {
 				src: item['Image Src'],
-				// alt: item['Image Alt Text'],
+				alt: item['Image Alt Text'],
 			},
 			tags: item.Tags,
 		},
