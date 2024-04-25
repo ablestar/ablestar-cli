@@ -35,6 +35,19 @@ The output file will look like this:
 
 <img src="https://static.ablestar.app/ablestar-cli/Shopify Order Export.png" width="1258"/>
 
+## Supported Objects
+
+We're slowly adding support for additional Shopify record types. If you would like to see one added please submit an issue or PR.
+
+| Object     | Export | Import/Update |
+|-------------|:--------:|:--------:|
+| Products   | ✅       | ❌       |
+| Orders   | ✅       | ❌       |
+| Pages | ✅     | ✅       |
+| Blog Posts | ✅     | ✅       |
+| Smart & Manual Collections | ✅     | ✅      |
+| Metaobject Entries | ✅     | ❌      |
+| Discount Codes | ✅     | ❌      |
 
 ## Contributing
 
