@@ -129,7 +129,7 @@ export function getHeader(json, type, fields) {
 	let keys = [],
 		header = [];
 
-	if (type.includes('metaobject_definitions')) {
+	if (type.includes('metaobject_definitions') || type.includes('metafield_definitions')) {
 		return {keys: Object.keys(json[0]), header: Object.keys(json[0])}
 	}
 	

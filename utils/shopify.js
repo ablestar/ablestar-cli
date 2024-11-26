@@ -385,3 +385,47 @@ export async function shopifyGraphMetaobjectEntries({ store, type, endCursor }) 
 	
 	return response.data.data?.metaobjects;
 }
+
+const METAFIELD_QUERY = (cursor) => `{
+  metafieldDefinitions(first: 250, ownerType: PRODUCT ${cursor ? `, after: "${cursor}"` : ''}) {
+		nodes {
+			id
+			name
+			type {
+				name
+			}
+			metafieldsCount
+			metafields(first: 250) {
+				nodes {
+					id
+					key
+					description
+					type
+					value
+					namespace
+				}
+			}
+		}
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+	}
+}`
+
+export async function shopifyGraphMetafield({ store, endCursor }) {
+	const { token } = await getKeyToken(store);
+	const QUERY = METAFIELD_QUERY(endCursor);
+
+	const response = await axios.post(
+		`https://${store}/admin/api/${apiVersion}/graphql.json`,
+		QUERY,
+		{
+			headers: {
+				'Content-Type': 'application/graphql',
+				'X-Shopify-Access-Token': token,
+			},
+		},
+	);
+	return response.data.data?.metafieldDefinitions;
+}

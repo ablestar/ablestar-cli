@@ -2,7 +2,14 @@ import arg from 'arg';
 import inquirer from 'inquirer';
 import showHelp from './help.js';
 import chalk from 'chalk';
-import { generateFileName, jsonToSheet, sheetToCsv, validateApiKey, validateFileName, validateURL } from '../utils/index.js';
+import {
+	generateFileName,
+	jsonToSheet,
+	sheetToCsv,
+	validateApiKey,
+	validateFileName,
+	validateURL,
+} from '../utils/index.js';
 import { verifyApiKey } from './verify.js';
 import ora from 'ora';
 import { run } from './main.js';
@@ -28,7 +35,13 @@ import { actionTree } from '../utils/actions.js';
 
 import inquirerPrompt from 'inquirer-autocomplete-prompt';
 import fuzzyPath from 'inquirer-fuzzy-path';
-import { runImport, runImportArticles, runImportCustomCollection, runImportPages, runImportSmartCollection } from './import.js';
+import {
+	runImport,
+	runImportArticles,
+	runImportCustomCollection,
+	runImportPages,
+	runImportSmartCollection,
+} from './import.js';
 import os from 'os';
 
 const appRootPath = { path: os.homedir() };
@@ -145,6 +158,7 @@ export async function promptForMissingOptions(options) {
 				{ name: 'Customers', value: 'customers' },
 				{ name: 'Manual Collection', value: 'custom_collections' },
 				{ name: 'Automated Collection', value: 'smart_collections' },
+				{ name: 'Metafield Definitions', value: 'metafield_definitions' },
 				{ name: 'Metaobject Definitions', value: 'metaobject_definitions' },
 				{ name: 'Metaobject Entries', value: 'metaobject_entries' },
 				{ name: 'Discounts', value: 'price_rules' },
@@ -160,7 +174,9 @@ export async function promptForMissingOptions(options) {
 			message: () => {
 				let config = {};
 				if (fs.existsSync(appRootPath.path + '/.ablestar/cli.ini')) {
-					config = ini.parse(fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'));
+					config = ini.parse(
+						fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'),
+					);
 				}
 
 				return Object.keys(config).filter(key => key !== 'core').length
@@ -170,7 +186,9 @@ export async function promptForMissingOptions(options) {
 			choices: () => {
 				let config = {};
 				if (fs.existsSync(appRootPath.path + '/.ablestar/cli.ini')) {
-					config = ini.parse(fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'));
+					config = ini.parse(
+						fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'),
+					);
 				}
 				return Object.keys(config).filter(key => key !== 'core');
 			},
@@ -216,7 +234,13 @@ export async function promptForMissingOptions(options) {
 				if (answers.type === 'blogs' || options.type === 'blogs') return blogsFields;
 			},
 			multiple: true,
-			when: (answers) => !options.fields?.length && !options.group?.length && (!answers.type?.includes('metaobject_definitions') && !options.type?.includes('metaobject_definitions')),
+			when: answers =>
+				!options.fields?.length &&
+				!options.group?.length &&
+				!answers.type?.includes('metaobject_definitions') &&
+				!options.type?.includes('metaobject_definitions') &&
+				!answers.type?.includes('metafield_definitions') &&
+				!options.type?.includes('metafield_definitions'),
 		},
 	];
 
@@ -293,8 +317,7 @@ async function importFile(options) {
 			when: () => !options.fileName,
 
 			excludePath: nodePath =>
-				nodePath.startsWith('node_modules') ||
-				nodePath.includes('git'),
+				nodePath.startsWith('node_modules') || nodePath.includes('git'),
 			// excludePath :: (String) -> Bool
 			// excludePath to exclude some paths from the file-system scan
 			excludeFilter: nodePath => nodePath == '.',
@@ -347,7 +370,9 @@ async function importOptions(options, fileData) {
 			message: () => {
 				let config = {};
 				if (fs.existsSync(appRootPath.path + '/.ablestar/cli.ini')) {
-					config = ini.parse(fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'));
+					config = ini.parse(
+						fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'),
+					);
 				}
 
 				return Object.keys(config).filter(key => key !== 'core').length
@@ -357,7 +382,9 @@ async function importOptions(options, fileData) {
 			choices: () => {
 				let config = {};
 				if (fs.existsSync(appRootPath.path + '/.ablestar/cli.ini')) {
-					config = ini.parse(fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'));
+					config = ini.parse(
+						fs.readFileSync(appRootPath.path + '/.ablestar/cli.ini', 'utf-8'),
+					);
 				}
 				return Object.keys(config).filter(key => key !== 'core');
 			},
@@ -378,7 +405,10 @@ async function importOptions(options, fileData) {
 			choices: () => {
 				return Object.keys(fileData[0]);
 			},
-			when: (answers) => !options.idColumn && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
+			when: answers =>
+				!options.idColumn &&
+				options.format !== 'Matrixify' &&
+				answers.format !== 'Matrixify',
 		},
 		{
 			type: 'list',
@@ -387,7 +417,8 @@ async function importOptions(options, fileData) {
 			choices: answers => {
 				return actionTree(answers.type || options.type);
 			},
-			when: (answers) => !options.action && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
+			when: answers =>
+				!options.action && options.format !== 'Matrixify' && answers.format !== 'Matrixify',
 		},
 		{
 			type: 'list',
@@ -396,7 +427,10 @@ async function importOptions(options, fileData) {
 			choices: () => {
 				return Object.keys(fileData[0]);
 			},
-			when: (answers) => !options.actionColumn && (options.format !== 'Matrixify' && answers.format !== 'Matrixify'),
+			when: answers =>
+				!options.actionColumn &&
+				options.format !== 'Matrixify' &&
+				answers.format !== 'Matrixify',
 		},
 	];
 
@@ -460,32 +494,57 @@ async function cli(args) {
 
 			if (options.format === 'Matrixify') {
 				let outputData = {};
-				if (options.type === 'custom_collections') outputData = await runImportCustomCollection(options, fileData);
-				if (options.type === 'smart_collections') outputData = await runImportSmartCollection(options, fileData);
+				if (options.type === 'custom_collections')
+					outputData = await runImportCustomCollection(options, fileData);
+				if (options.type === 'smart_collections')
+					outputData = await runImportSmartCollection(options, fileData);
 				if (options.type === 'pages') outputData = await runImportPages(options, fileData);
-				if (options.type === 'articles') outputData = await runImportArticles(options, fileData);
+				if (options.type === 'articles')
+					outputData = await runImportArticles(options, fileData);
 
 				const outputJson = fileData.map((item, itemIndex) => {
-					const { itemKey, ...rest } = Object.values(outputData).find(i => i.itemKey === item.ID || i.itemKey === item.Handle || i.itemKey === itemIndex);
-					
-					return { ...item, ...rest }
-				})
+					const { itemKey, ...rest } = Object.values(outputData).find(
+						i =>
+							i.itemKey === item.ID ||
+							i.itemKey === item.Handle ||
+							i.itemKey === itemIndex,
+					);
 
-				const outputHeader = [await getHeaderColumn(options.fileName), ['ID (ref)', 'Handle (ref)', 'Import Result', 'Import Comment']].flat();
+					return { ...item, ...rest };
+				});
+
+				const outputHeader = [
+					await getHeaderColumn(options.fileName),
+					['ID (ref)', 'Handle (ref)', 'Import Result', 'Import Comment'],
+				].flat();
 
 				let worksheet;
-				const outputSheet = jsonToSheet(outputJson, 0, worksheet, 'output', outputHeader, outputHeader);
+				const outputSheet = jsonToSheet(
+					outputJson,
+					0,
+					worksheet,
+					'output',
+					outputHeader,
+					outputHeader,
+				);
 				sheetToCsv(outputSheet, `${options.fileName}_Results.csv`);
 
-				console.log("Result Saved to ", chalk.greenBright(`${options.fileName}_Results.csv \n`));
-			}
-
-			else await runImport(options, fileData);
+				console.log(
+					'Result Saved to ',
+					chalk.greenBright(`${options.fileName}_Results.csv \n`),
+				);
+			} else await runImport(options, fileData);
 
 			console.log(chalk.bgCyan.black(' == Alternative Command == '));
 			console.log(
 				chalk.cyan(
-					`ablestar-cli ${options.method} ${options.type} ${options.url} --fileName=${options.fileName} --format=${options.format} ${options.type === 'customers' ? `--idColumn=${options.idColumn} --action=${options.action} --actionColumn=${options.actionColumn}` : ``}`,
+					`ablestar-cli ${options.method} ${options.type} ${options.url} --fileName=${
+						options.fileName
+					} --format=${options.format} ${
+						options.type === 'customers'
+							? `--idColumn=${options.idColumn} --action=${options.action} --actionColumn=${options.actionColumn}`
+							: ``
+					}`,
 				),
 			);
 		}
