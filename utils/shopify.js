@@ -13,12 +13,16 @@ axios.interceptors.response.use(
 		if (error.response?.status === 429) {
 			return Promise.reject(429);
 		}
-		
+
 		if (error.code === 'ETIMEDOUT' && error.port === 443) {
 			return Promise.reject(443);
 		}
-		
-		if (error.code === 'ECONNRESET' || error.response?.status === 502|| error.response?.status === 504) {
+
+		if (
+			error.code === 'ECONNRESET' ||
+			error.response?.status === 502 ||
+			error.response?.status === 504
+		) {
 			return Promise.reject(4077);
 		}
 
@@ -35,7 +39,7 @@ const TEST_GRAPHQL_QUERY = `
   }
 }`;
 
-const apiVersion = "2023-04";
+const apiVersion = '2023-04';
 
 export async function verifyToken({ url, apiPass }) {
 	const response = await axios.post(
@@ -85,7 +89,6 @@ export async function shopifyRESTApi(store, resource, method, query) {
 		}
 		throw error;
 	}
-	
 }
 
 export async function shopifyItemRESTApi(store, resource, itemId, method, query) {
@@ -138,7 +141,6 @@ export async function shopifyRESTApiCount(store, resource, method, query) {
 			return await shopifyRESTApiCount(store, resource, method, query);
 		}
 	}
-	
 }
 
 export async function shopifyRESTApiDomain(store, method, query) {
@@ -163,7 +165,6 @@ export async function shopifyRESTApiDomain(store, method, query) {
 			return await shopifyRESTApiDomain(store, method, query);
 		}
 	}
-	
 }
 
 export async function shopifyRESTApiCollectionProducts(store, collectionId) {
@@ -190,7 +191,14 @@ export async function shopifyRESTApiCollectionProducts(store, collectionId) {
 	}
 }
 
-export async function shopifyRESTApiSubList(store, type, mainId, subtype, method = 'get', query = {}) {
+export async function shopifyRESTApiSubList(
+	store,
+	type,
+	mainId,
+	subtype,
+	method = 'get',
+	query = {},
+) {
 	const { apikey, token } = await getKeyToken(store);
 	try {
 		const response = await axios[method](
@@ -217,7 +225,15 @@ export async function shopifyRESTApiSubList(store, type, mainId, subtype, method
 	}
 }
 
-export async function shopifyRESTApiSubItem(store, type, mainId, subtype, subId, method = 'get', query = {}) {
+export async function shopifyRESTApiSubItem(
+	store,
+	type,
+	mainId,
+	subtype,
+	subId,
+	method = 'get',
+	query = {},
+) {
 	const { apikey, token } = await getKeyToken(store);
 	try {
 		const response = await axios[method](
@@ -268,7 +284,6 @@ export async function shopifyRESTApiProductMetafield(store, productId) {
 	}
 }
 
-
 export async function shopifyRESTApiVariantMetafield(store, variantId) {
 	const { apikey, token } = await getKeyToken(store);
 	try {
@@ -302,7 +317,7 @@ export async function shopifyRESTApiSingle(store, resource, id, method, query) {
 	return response.data;
 }
 
-const META_QUERY = (cursor) => `{
+const META_QUERY = cursor => `{
   metaobjectDefinitions(first: 250 ${cursor ? `, after: "${cursor}"` : ''}) {
 		nodes {
 			id
@@ -324,7 +339,7 @@ const META_QUERY = (cursor) => `{
 			endCursor
 		}
 	}
-}`
+}`;
 
 export async function shopifyGraphMetaobject({ store, endCursor }) {
 	const { token } = await getKeyToken(store);
@@ -361,7 +376,7 @@ const ENTRY_QUERY = (cursor, type) => `{
 			endCursor
 		}
 	}
-}`
+}`;
 
 export async function shopifyGraphMetaobjectEntries({ store, type, endCursor }) {
 	const { token } = await getKeyToken(store);
@@ -382,36 +397,30 @@ export async function shopifyGraphMetaobjectEntries({ store, type, endCursor }) 
 		sleep(2000);
 		return await shopifyGraphMetaobjectEntries({ store, type, endCursor });
 	}
-	
+
 	return response.data.data?.metaobjects;
 }
 
-const METAFIELD_QUERY = (cursor) => `{
+const METAFIELD_QUERY = cursor => `{
   metafieldDefinitions(first: 250, ownerType: PRODUCT ${cursor ? `, after: "${cursor}"` : ''}) {
 		nodes {
 			id
 			name
+			namespace
+			key
+			description
+			ownerType
 			type {
 				name
 			}
 			metafieldsCount
-			metafields(first: 250) {
-				nodes {
-					id
-					key
-					description
-					type
-					value
-					namespace
-				}
-			}
 		}
 		pageInfo {
 			hasNextPage
 			endCursor
 		}
 	}
-}`
+}`;
 
 export async function shopifyGraphMetafield({ store, endCursor }) {
 	const { token } = await getKeyToken(store);
@@ -428,4 +437,55 @@ export async function shopifyGraphMetafield({ store, endCursor }) {
 		},
 	);
 	return response.data.data?.metafieldDefinitions;
+}
+
+const createMetafieldsMutation = metafieldDefinition => {
+	return `mutation {
+	  metafieldDefinitionCreate(definition: {
+		namespace: "${metafieldDefinition.namespace}",
+		key: "${metafieldDefinition.key}",
+		name: "${metafieldDefinition.name}",
+		type: "${metafieldDefinition.type}",
+		description: "${metafieldDefinition.description}",
+		ownerType: ${metafieldDefinition.ownerType}
+	  }) {
+		createdDefinition {
+		  id
+		  namespace
+		  key
+		  name
+		  type {
+			name
+		  }
+		  description
+		  ownerType
+		  metafieldsCount
+		}
+		userErrors {
+		  field
+		  message
+		}
+	  }
+	}`;
+};
+
+export async function createMetafieldDefinitions({ store, metafieldDefinitions }) {
+	const { token } = await getKeyToken(store);
+
+	return metafieldDefinitions.map(async definition => {
+		const mutation = createMetafieldsMutation(definition);
+
+		const response = await axios.post(
+			`https://${store}/admin/api/${apiVersion}/graphql.json`,
+			{ query: mutation },
+			{
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Shopify-Access-Token': token,
+				},
+			},
+		);
+
+		return response.data.data.metafieldDefinitionCreate.createdDefinition;
+	});
 }

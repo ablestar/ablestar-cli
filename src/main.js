@@ -182,16 +182,15 @@ export async function run(options) {
 				result = [
 					...result,
 					...data.nodes
-						.map(item =>
-							item.metafields.nodes.map(itemField => ({
-								id: itemField.id,
-								namespace: itemField.namespace,
-								type: itemField.type,
-								key: itemField.key,
-								description: itemField.description,
-								value: itemField.value,
-							})),
-						)
+						.map(item => ({
+							id: item.id,
+							name: item.name,
+							namespace: item.namespace,
+							key: item.key,
+							description: item.description,
+							ownerType: item.ownerType,
+							type: item.type.name,
+						}))
 						.flat(),
 				];
 

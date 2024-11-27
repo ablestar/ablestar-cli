@@ -122,6 +122,19 @@ export const articlesQuery = (item, result, showId = false) => {
 	};
 };
 
+export const metafieldDefinitionQuery = item => {
+	return {
+		metafield_definition: {
+			namespace: item['Namespace'],
+			key: item['Key'],
+			name: item['Name'],
+			description: item['Description'],
+			owner_type: item['Owner Type'],
+			type: item['Type'],
+		},
+	};
+};
+
 export const groupSmartCollection = inputJson => {
 	if (!inputJson || !inputJson.length) return [];
 
@@ -213,7 +226,6 @@ export const runMatrixify = async (
 					limit,
 				},
 			};
-
 			const data = await shopifyRESTApi(options.url, options.type, 'get', query);
 
 			if (data[options.type].length === 0) break;

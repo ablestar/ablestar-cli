@@ -41,7 +41,9 @@ import {
 	runImportCustomCollection,
 	runImportPages,
 	runImportSmartCollection,
+	runImportMetafieldDefinitions,
 } from './import.js';
+import { createMetafieldDefinitions } from '../utils/shopify.js';
 import os from 'os';
 
 const appRootPath = { path: os.homedir() };
@@ -357,6 +359,7 @@ async function importOptions(options, fileData) {
 				{ name: 'Orders', value: 'orders' },
 				{ name: 'Customers', value: 'customers' },
 				{ name: 'Manual Collection', value: 'custom_collections' },
+				{ name: 'Metafield Definitions', value: 'metafield_definitions' },
 				{ name: 'Automated Collection', value: 'smart_collections' },
 				{ name: 'Pages', value: 'pages' },
 				{ name: 'Blog Posts', value: 'articles' },
@@ -483,7 +486,8 @@ async function cli(args) {
 			console.log(chalk.bgCyan.black(' == Alternative Command == '));
 			console.log(
 				chalk.cyan(
-					`ablestar-cli ${options.method} ${options.type} ${options.url} --format=${options.format
+					`ablestar-cli ${options.method} ${options.type} ${options.url} --format=${
+						options.format
 					} --fileName=${options.fileName}${getGroup(options.type, options.fields)}`,
 				),
 			);
@@ -501,6 +505,11 @@ async function cli(args) {
 				if (options.type === 'pages') outputData = await runImportPages(options, fileData);
 				if (options.type === 'articles')
 					outputData = await runImportArticles(options, fileData);
+				if (options.type === 'metafield_definitions')
+					outputData = await createMetafieldDefinitions({
+						store: options.url,
+						metafieldDefinitions: fileData,
+					});
 
 				const outputJson = fileData.map((item, itemIndex) => {
 					const { itemKey, ...rest } = Object.values(outputData).find(
